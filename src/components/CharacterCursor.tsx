@@ -1,4 +1,3 @@
-// @ts-nocheck // <-- BU QATORNI O'CHIRING!
 'use client';
 import React, { useEffect, useRef } from 'react';
 
