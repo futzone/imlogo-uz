@@ -1,4 +1,4 @@
-// @ts-nocheck
+// @ts-nocheck // <-- BU QATORNI O'CHIRING!
 'use client';
 import React, { useEffect, useRef } from 'react';
 
@@ -164,9 +164,11 @@ const CharacterCursor: React.FC<CharacterCursorProps> = ({
       context.textAlign = 'center';
 
       characters.forEach((char) => {
-        let measurements = context.measureText(char);
-        let bgCanvas = document.createElement('canvas');
-        let bgContext = bgCanvas.getContext('2d');
+        // ----- TUZATISH BU YERDA -----
+        const measurements = context!.measureText(char); // context null bo'lmasligiga ishonch hosil qilish uchun ! qo'shdim (agar init to'g'ri ishlasa)
+        const bgCanvas = document.createElement('canvas');
+        const bgContext = bgCanvas.getContext('2d');
+        // ----- TUZATISH SHU YERGACHA -----
 
         if (bgContext) {
           bgCanvas.width = measurements.width;
@@ -175,7 +177,9 @@ const CharacterCursor: React.FC<CharacterCursorProps> = ({
           bgContext.textAlign = 'center';
           bgContext.font = font;
           bgContext.textBaseline = 'middle';
-          var randomColor = colors[Math.floor(Math.random() * colors.length)];
+          // ----- TUZATISH BU YERDA -----
+          const randomColor = colors[Math.floor(Math.random() * colors.length)];
+          // ----- TUZATISH SHU YERGACHA -----
           bgContext.fillStyle = randomColor;
 
           bgContext.fillText(
@@ -190,6 +194,7 @@ const CharacterCursor: React.FC<CharacterCursorProps> = ({
 
       bindEvents();
       loop();
+      return true; // init muvaffaqiyatli bo'lsa true qaytarish (ixtiyoriy)
     };
 
     const bindEvents = () => {
@@ -254,6 +259,8 @@ const CharacterCursor: React.FC<CharacterCursorProps> = ({
       if (!canvas || !context) return;
 
       if (particlesRef.current.length === 0) {
+        // Agar zarralar qolmagan bo'lsa ham canvasni tozalash mantiqan to'g'ri
+        // context.clearRect(0, 0, canvas.width, canvas.height); // <-- Kerak bo'lsa buni yoqing
         return;
       }
 
@@ -271,6 +278,8 @@ const CharacterCursor: React.FC<CharacterCursorProps> = ({
         }
       }
 
+      // Agar tozalashdan keyin zarralar qolmagan bo'lsa, yana tozalash
+      // Bu oxirgi zarracha o'chganda canvas toza bo'lishini ta'minlaydi
       if (particlesRef.current.length === 0) {
         context.clearRect(0, 0, canvas.width, canvas.height);
       }
@@ -284,16 +293,20 @@ const CharacterCursor: React.FC<CharacterCursorProps> = ({
     init();
 
     return () => {
-      if (canvas) {
-        canvas.remove();
+      // O'chirish funksiyasida ham canvas mavjudligini tekshirish
+      if (canvas && canvas.parentNode) {
+         canvas.parentNode.removeChild(canvas); // remove() o'rniga ishonchliroq usul
       }
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
+      // Event listenerlarni o'chirishda ham element mavjudligini tekshirish
       const element = wrapperElement || document.body;
-      element.removeEventListener('mousemove', onMouseMove);
-      element.removeEventListener('touchmove', onTouchMove);
-      element.removeEventListener('touchstart', onTouchMove);
+      if (element) {
+          element.removeEventListener('mousemove', onMouseMove);
+          element.removeEventListener('touchmove', onTouchMove);
+          element.removeEventListener('touchstart', onTouchMove);
+      }
       window.removeEventListener('resize', onWindowResize);
     };
   }, [
