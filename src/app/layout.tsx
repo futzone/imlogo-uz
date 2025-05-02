@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/images/og-image.jpg',
+        url: '/images/logo-no-text.png',
         width: 1200,
         height: 675,
         alt: siteDetails.siteName,
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: siteDetails.metadata.title,
     description: siteDetails.metadata.description,
-    images: ['/images/twitter-image.jpg'],
+    images: ['/images/logo-no-text.png'],
   },
 };
 
@@ -41,7 +41,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="uz" >
+      <head>
+      <meta name="google-site-verification" content="G6pz2wyPxNp4awm1mHbtfuCD75sbYU0soGlXvySux9E" />
+      </head>
       <body
         className={`${manrope.className} ${sourceSans.className} antialiased`}
       >
