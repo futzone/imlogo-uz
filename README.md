@@ -1,6 +1,6 @@
 # 📘 Imlo Go — O‘zbek tilidagi Diktant App Landing Page
 
-![Imlo Go Banner](public/og-image.jpg)
+![Imlo Go Banner](public/images/aaa-front.webp)
 
 **Imlo Go** — bu o‘zbek tilida diktant yozishni, imlo xatolarni aniqlashni va o‘rganishni yangi bosqichga olib chiqadigan platformaning landing sahifasidir. Ushbu repo orqali siz platformaning marketing va taqdimot sahifasini topasiz.
 
@@ -71,9 +71,9 @@ Xatolik topsangiz yoki yaxshilash g‘oyalaringiz bo‘lsa, **Pull Request** yub
 
 ---
 
-> Yaratuvchi: [@yourusername](https://github.com/yourusername)
+> Yaratuvchi: [@futzone](https://github.com/futzone)
 > Diktant platformasi: [Imlo Go](https://imlogo.uz)
-> Til: 🇺🇿 O‘zbek tili
+> Til: O‘zbek tili
 
 
 
