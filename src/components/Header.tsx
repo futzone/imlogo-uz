@@ -44,7 +44,7 @@ const Header: React.FC = () => {
                             </li>
                         ))}
                         <li>
-                            <Link href="#cta" className="text-white bg-primary hover:bg-primary-accent px-8 py-3 rounded-full transition-colors">
+                            <Link href="https://app.imlogo.uz" className="text-white bg-primary hover:bg-primary-accent px-8 py-3 rounded-full transition-colors">
                                 Sinab ko‘rish
                             </Link>
                         </li>
@@ -90,7 +90,7 @@ const Header: React.FC = () => {
                             </li>
                         ))}
                         <li>
-                            <Link href="#cta" className="text-white bg-primary hover:bg-primary-accent px-5 py-2 rounded-full block w-fit" onClick={toggleMenu}>
+                            <Link href="https://app.imlogo.uz" className="text-white bg-primary hover:bg-primary-accent px-5 py-2 rounded-full block w-fit" onClick={toggleMenu}>
                                 Sinab ko‘rish
                             </Link>
                         </li>
