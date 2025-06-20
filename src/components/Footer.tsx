@@ -4,7 +4,6 @@ import Image from 'next/image';
 
 import { siteDetails } from '@/data/siteDetails';
 import { footerDetails } from '@/data/footer';
-import { getPlatformIconByName } from '@/utils';
 
 const Footer: React.FC = () => {
     return (
