@@ -7,7 +7,7 @@ export const footerDetails: {
     telephone: string;
     socials: ISocials;
 } = {
-    subheading: "Loyiha, Alisher Navoiy nomidagi Toshkent davlat o'zbek tili va adabiyoti universiteti, «Kompyuter lingvistikasi» fakulteti bitiruvchi kurs talabasi Abdumalikova Gulshoda tomonidan bitiruv malakaviy topshiriq ishi sifatida tayyorlandi.",
+    subheading: "Loyiha Alisher Navoiy nomidagi Toshkent davlat o'zbek tili va adabiyoti universiteti, «Kompyuter lingvistikasi» yo'nalishi bitiruvchi kurs talabasi Abdumalikova Gulshoda tomonidan bitiruv malakaviy ishi sifatida tayyorlandi.",
     quickLinks: [
         {
             text: "Dastur haqida",
@@ -18,7 +18,7 @@ export const footerDetails: {
             url: "#testimonials"
         }
     ],
-    email: 'address@yoursite.com',
+    email: 'abdumalikovagulshoda2403@gmail.com',
     telephone: '+99899999999',
     socials: {
         // github: 'https://github.com',

@@ -3,21 +3,21 @@ import { siteDetails } from "./siteDetails";
 
 export const testimonials: ITestimonial[] = [
     {
-        name: 'John Smith',
-        role: 'CEO at Company',
-        message: `${siteDetails.siteName}'s AI-driven insights have transformed how we approach financial planning for our clients. It's an invaluable resource in the modern financial landscape.`,
+        name: 'Abdurazzoqov Hasanjon',
+        role: 'SMM Manager, CEO',
+        message: `${siteDetails.siteName} ona tilimizning rivoji uchun katta ahamiyatga ega dasturlar yaratilishining birinchi bosqichidagi ilovadir. Agar imlo qoidalariga rioya qilishni o'rgansak, qolgan me'zonlarni yaxshilash oson kechadi.`,
         avatar: '/images/testimonial-1.webp',
     },
     {
-        name: 'Jane Doe',
-        role: 'CTO at Startup',
-        message: `As a CTO, I'm impressed by ${siteDetails.siteName}'s robust security measures and seamless integrations. It's rare to find an app that balances user-friendliness with such advanced technology.`,
+        name: 'Lisa Kalashnikova',
+        role: 'LLM, NLP Engineer at META',
+        message: `O'zbekiston yoshlarining o'zbek tilini raqamli dunyoda ham rivojlantirishga harakat qilishi bu juda katta yutuq. ${siteDetails.siteName} loyihasi kichik bo'lsa-da bunga yaqqol isbot bo'la oladi. To'xtamang Imlo Go team!`,
         avatar: '/images/testimonial-2.webp',
     },
     {
         name: 'Emily Johnson',
-        role: 'Product Manager',
-        message: `${siteDetails.siteName} is revolutionizing personal finance management. Its intuitive design and powerful features make it an indispensable tool for anyone serious about financial growth.`,
+        role: 'Central Asia Reasearcher',
+        message: `Zamonaviy dunyoda butun boshli tarix, til ham juda tez yo'qolib bormoqda. Imlo Go kabi mamlakat ona tilini rivojlantirishga qaratilgan dasturlar bu yo'qolib ketishlarga qarshi chiqibgina qolmay, tilni targ'ib qilishga ham katta yordam beradi.`,
         avatar: '/images/testimonial-3.webp',
     },
 ];
