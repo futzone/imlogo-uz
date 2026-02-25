@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --primary: #6750A4;
+  --secondary: #304fff;
+
+  --primary-accent: #3107a3;
+  --foreground-accent: #454545;
+  --hero-background: #F3F3F5;
+}
+
+html {
+  @apply scroll-smooth;
+}
+
+body {
+  @apply text-lg;
+  
+  color: var(--foreground);
+  background: var(--background);
+  font-family: "Source Sans 3", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  /* width: 100dvw;
+  height: 200dvh;
+  overflow: hidden; */
+}
+
+#fluid {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100dvw;
+  height: 100dvh;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+.manrope {
+  font-family: "Manrope", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Manrope", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+#logos svg {
+  @apply w-fit h-10 sm:h-12;
+}
+
+.benefit-section:last-of-type > div {
+  @apply mb-10;
+}
+
+/* Hero warm gradient — purple top-left → cream bottom-right */
+.hero-gradient {
+  background:
+    radial-gradient(ellipse 80% 70% at 0% 0%, rgba(103,80,164,0.25) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 100% 100%, rgba(253,224,150,0.3) 0%, transparent 60%),
+    linear-gradient(
+      150deg,
+      #e8dff5 0%,
+      #f3eefa 15%,
+      #fdf6e8 50%,
+      #fef9ee 75%,
+      #fffdf8 100%
+    );
+  background-size: 200% 200%;
+  animation: hero-gradient-shift 12s ease infinite;
+}
+
+@keyframes hero-gradient-shift {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
+}
