@@ -73,6 +73,7 @@ Xatolik topsangiz yoki yaxshilash g‘oyalaringiz bo‘lsa, **Pull Request** yub
 
 > Yaratuvchi: [@futzone](https://github.com/futzone)
 > Diktant platformasi: [Imlo Go](https://imlogo.uz)
+> Aloqa uchun: [Telegram](https://t.me/Qahor0v_bot)
 > Til: O‘zbek tili
 
 
