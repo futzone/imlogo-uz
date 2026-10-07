@@ -2,32 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Dizayn tokenlari. Ranglar — Imlo Go palitrasi (och fon, binafsha, ko'k),
+ * shakl/tipografiya/harakat — "glow + grid + glass" dizayn tizimidan.
+ * Flutter ilovadagi `AppColors` shu qiymatlar bilan bir xil.
+ */
 :root {
   --background: #ffffff;
+  --surface: #f7f5fc;
   --foreground: #171717;
+  --muted: #5b6072;
+  --line: rgba(103, 80, 164, 0.14);
   --primary: #6750A4;
   --secondary: #304fff;
+  --tertiary: #fde096;
 
   --primary-accent: #3107a3;
   --foreground-accent: #454545;
   --hero-background: #F3F3F5;
+
+  /* Tailwind shaffoflik modifikatorlari (`bg-primary/10`) uchun RGB kanallari */
+  --background-rgb: 255 255 255;
+  --surface-rgb: 247 245 252;
+  --foreground-rgb: 23 23 23;
+  --muted-rgb: 91 96 114;
+  --primary-rgb: 103 80 164;
+  --secondary-rgb: 48 79 255;
+  --tertiary-rgb: 253 224 150;
+  --primary-accent-rgb: 49 7 163;
+  --success-rgb: 46 158 91;
+  --danger-rgb: 229 72 77;
+  --danger-deep-rgb: 159 29 44;
 }
 
 html {
   @apply scroll-smooth;
+  scroll-padding-top: 6rem;
 }
 
 body {
-  @apply text-lg;
-  
+  @apply text-base md:text-lg font-body leading-relaxed;
+
   color: var(--foreground);
   background: var(--background);
-  font-family: "Source Sans 3", sans-serif;
-  font-optical-sizing: auto;
-  font-style: normal;
-  /* width: 100dvw;
-  height: 200dvh;
-  overflow: hidden; */
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-heading leading-tight;
+}
+
+::selection {
+  background: rgba(103, 80, 164, 0.2);
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 #fluid {
@@ -42,29 +72,93 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+
+  /* Sarlavhaning oxirgi so'zlari uchun gradient matn */
+  .text-gradient {
+    @apply bg-brand-gradient bg-clip-text text-transparent;
+  }
+
+  /* Chetlarga qarab so'nuvchi katak (grid) naqsh */
+  .bg-grid-pattern {
+    background-size: 50px 50px;
+    background-image:
+      linear-gradient(to right, rgba(103, 80, 164, 0.1) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(103, 80, 164, 0.1) 1px, transparent 1px);
+    -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+    mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+  }
+
+  /* Shaffof "shisha" panel */
+  .glass {
+    @apply bg-white/70 backdrop-blur-lg border border-line;
+  }
 }
 
-.manrope {
-  font-family: "Manrope", sans-serif;
-  font-optical-sizing: auto;
-  font-style: normal;
+/* Ilova (/app) foni: yumshoq yorug'lik dog'lari */
+.app-backdrop {
+  background:
+    radial-gradient(circle at 8% 5%, rgba(103, 80, 164, 0.16), transparent 42%),
+    radial-gradient(circle at 95% 90%, rgba(253, 224, 150, 0.35), transparent 40%),
+    radial-gradient(circle at 90% 15%, rgba(48, 79, 255, 0.07), transparent 30%),
+    var(--background);
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: "Manrope", sans-serif;
-  font-optical-sizing: auto;
-  font-style: normal;
+/* Diktant audio pleyeri: oq yo'lakli slayder (gradient panel ustida) */
+.audio-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 16px;
+  background: transparent;
+  cursor: pointer;
 }
 
-#logos svg {
-  @apply w-fit h-10 sm:h-12;
+.audio-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    #fff var(--progress, 0%),
+    rgba(255, 255, 255, 0.3) var(--progress, 0%)
+  );
 }
 
-.benefit-section:last-of-type > div {
-  @apply mb-10;
+.audio-range::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.3);
 }
 
-/* Hero warm gradient — purple top-left → cream bottom-right */
+.audio-range::-moz-range-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: #fff;
+}
+
+.audio-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.audio-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+}
+
+/* Telefonda klaviatura ochiq (tez yozish) paytida pastki navigatsiya joy egallamasin */
+@media (pointer: coarse) {
+  body:has([data-typing-input]:focus) .app-bottom-tabs {
+    display: none;
+  }
+}
+
+/* Hero: binafsha (yuqori-chap) → sarg'ish (past-o'ng) iliq gradient */
 .hero-gradient {
   background:
     radial-gradient(ellipse 80% 70% at 0% 0%, rgba(103,80,164,0.25) 0%, transparent 60%),
@@ -85,4 +179,20 @@ h1, h2, h3, h4, h5, h6 {
   0% { background-position: 0% 0%; }
   50% { background-position: 100% 100%; }
   100% { background-position: 0% 0%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-gradient,
+  .animate-float,
+  .animate-float-slow,
+  .animate-spin-slow,
+  .animate-spin-slower,
+  .animate-ping,
+  .animate-caret-blink {
+    animation: none !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
 }

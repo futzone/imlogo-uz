@@ -3,29 +3,34 @@ import { ctaDetails } from "@/data/cta"
 import AppStoreButton from "./AppStoreButton"
 import PlayStoreButton from "./PlayStoreButton"
 import WindowsButton from "./WindowsButton"
+import Reveal from "./ui/Reveal"
 
 const CTA: React.FC = () => {
     return (
-        <section id="cta" className="mt-10 mb-5 lg:my-20">
-            <div className="relative h-full w-full z-10 mx-auto py-12 sm:py-20">
-                <div className="h-full w-full">
-                    <div className="rounded-3xl opacity-95 absolute inset-0 -z-10 h-full w-full bg-[#050a02] bg-[linear-gradient(to_right,#12170f_1px,transparent_1px),linear-gradient(to_bottom,#12170f_1px,transparent_1px)] bg-[size:6rem_4rem]">
-                        <div className="rounded-3xl absolute bottom-0 left-0 right-0 top-0 bg-[radial-gradient(circle_600px_at_50%_500px,#1C1C02,transparent)]"></div>
-                    </div>
+        <section id="cta" className="bg-background px-5 py-20 md:py-24">
+            <Reveal className="mx-auto max-w-7xl">
+                <div className="relative overflow-hidden rounded-3xl bg-[#14101f] px-5 py-16 text-center text-white shadow-glow-card sm:py-20">
+                    {/* Katak naqsh va binafsha yorug'lik */}
+                    <div
+                        aria-hidden
+                        className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(circle_at_center,black_40%,transparent_100%)]"
+                    />
+                    <div aria-hidden className="absolute -bottom-40 left-1/2 h-80 w-[36rem] max-w-full -translate-x-1/2 rounded-full bg-primary opacity-60 blur-[120px]" />
+                    <div aria-hidden className="absolute -top-32 right-0 h-64 w-64 rounded-full bg-secondary opacity-30 blur-[120px]" />
 
-                    <div className="h-full flex flex-col items-center justify-center text-white text-center px-5">
-                        <h2 className="text-2xl sm:text-3xl md:text-5xl md:leading-tight font-semibold mb-4 max-w-2xl">{ctaDetails.heading}</h2>
+                    <div className="relative flex flex-col items-center">
+                        <h2 className="max-w-2xl text-3xl font-bold text-balance md:text-5xl">{ctaDetails.heading}</h2>
 
-                        <p className="mx-auto max-w-xl md:px-5">{ctaDetails.subheading}</p>
+                        <p className="mx-auto mt-4 max-w-xl text-white/70">{ctaDetails.subheading}</p>
 
-                        <div className="mt-4 flex flex-col sm:flex-row items-center sm:gap-4">
-                        <AppStoreButton />
-                        <PlayStoreButton />
-                        <WindowsButton />
+                        <div className="mt-8 flex w-full max-w-xs flex-col items-center gap-3 sm:max-w-none sm:flex-row sm:justify-center sm:gap-4">
+                            <AppStoreButton />
+                            <PlayStoreButton />
+                            <WindowsButton />
                         </div>
                     </div>
                 </div>
-            </div>
+            </Reveal>
         </section>
     )
 }

@@ -5,7 +5,7 @@ export const testimonials: ITestimonial[] = [
     {
         name: 'Abdurazzoqov Hasanjon',
         role: 'SMM Manager, CEO',
-        message: `${siteDetails.siteName} ona tilimizning rivoji uchun katta ahamiyatga ega dasturlar yaratilishining birinchi bosqichidagi ilovadir. Agar imlo qoidalariga rioya qilishni o'rgansak, qolgan me'zonlarni yaxshilash oson kechadi.`,
+        message: `${siteDetails.siteName} ona tilimizning rivoji uchun katta ahamiyatga ega dasturlar yaratilishining birinchi bosqichidagi ilovadir. Agar imlo qoidalariga rioya qilishni o'rgansak, qolgan mezonlarni yaxshilash oson kechadi.`,
         avatar: '/images/testimonial-1.webp',
     },
     {
@@ -16,7 +16,7 @@ export const testimonials: ITestimonial[] = [
     },
     {
         name: 'Emily Johnson',
-        role: 'Central Asia Reasearcher',
+        role: 'Central Asia Researcher',
         message: `Zamonaviy dunyoda butun boshli tarix, til ham juda tez yo'qolib bormoqda. Imlo Go kabi mamlakat ona tilini rivojlantirishga qaratilgan dasturlar bu yo'qolib ketishlarga qarshi chiqibgina qolmay, tilni targ'ib qilishga ham katta yordam beradi.`,
         avatar: '/images/testimonial-3.webp',
     },

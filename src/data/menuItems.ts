@@ -7,10 +7,14 @@ export const menuItems: IMenuItem[] = [
     },
     {
         text: "Dastur haqida",
-        url: "#features"
+        url: "/#features"
+    },
+    {
+        text: "Tez yozish",
+        url: "/#tez-yozish"
     },
     {
         text: "Fikrlar",
-        url: "#testimonials"
+        url: "/#testimonials"
     }
 ];

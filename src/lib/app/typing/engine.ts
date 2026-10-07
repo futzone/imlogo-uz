@@ -1,0 +1,224 @@
+import { TypingConfig } from './config';
+import { isSameTypingChar, isTypedWordCorrect } from './text';
+
+/** Mashqning bir soniyalik kesimi (natija grafigi uchun). */
+export interface TypingSample {
+    second: number;
+    wpm: number;
+    raw: number;
+    errors: number;
+}
+
+export interface TypingStats {
+    /** Daqiqasiga so'z: faqat to'g'ri terilgan so'zlarning belgilari / 5. */
+    wpm: number;
+    /** Xatolarni hisobga olmagan "xom" tezlik. */
+    raw: number;
+    /** To'g'ri bosilgan klavishlar foizi. */
+    accuracy: number;
+    /** Tezlikning barqarorligi (0–100). */
+    consistency: number;
+    correctChars: number;
+    incorrectChars: number;
+    extraChars: number;
+    missedChars: number;
+}
+
+/** So'zdan ortiqcha terilishi mumkin bo'lgan belgilar soni. */
+const MAX_EXTRA_CHARS = 8;
+const TIME_MODE_BUFFER = 60;
+
+/**
+ * Tez yozish mashqining holati va hisob-kitobi. UI'dan mustaqil: vaqt
+ * tashqaridan (millisoniyalarda) beriladi.
+ */
+export class TypingEngine {
+    readonly words: string[] = [];
+    readonly typed: string[] = [];
+    readonly samples: TypingSample[] = [];
+
+    current = '';
+    started = false;
+    finished = false;
+    finishedAt: number | null = null;
+
+    private correctKeys = 0;
+    private incorrectKeys = 0;
+    private secondKeys = 0;
+    private secondErrors = 0;
+
+    constructor(
+        readonly config: TypingConfig,
+        private readonly nextWord: () => string
+    ) {
+        this.fill();
+    }
+
+    get index(): number {
+        return this.typed.length;
+    }
+
+    get target(): string {
+        return this.words[this.index];
+    }
+
+    private fill() {
+        const wanted = this.config.mode === 'words' ? this.config.amount : this.typed.length + TIME_MODE_BUFFER;
+        while (this.words.length < wanted) this.words.push(this.nextWord());
+    }
+
+    private keystroke(correct: boolean) {
+        this.started = true;
+        this.secondKeys++;
+        if (correct) {
+            this.correctKeys++;
+        } else {
+            this.incorrectKeys++;
+            this.secondErrors++;
+        }
+    }
+
+    /**
+     * Joriy so'z uchun kiritilgan matnni yangilaydi. Qo'shilgan har bir yangi
+     * belgi klavish bosilishi sifatida hisoblanadi.
+     */
+    setCurrent(value: string, elapsedMs = 0) {
+        if (this.finished) return;
+        const target = this.target;
+        value = value.replace(/\s/g, '').slice(0, target.length + MAX_EXTRA_CHARS);
+        if (value === this.current) return;
+
+        let common = 0;
+        while (common < value.length && common < this.current.length && value[common] === this.current[common]) {
+            common++;
+        }
+        for (let i = common; i < value.length; i++) {
+            this.keystroke(i < target.length && isSameTypingChar(value[i], target[i]));
+        }
+        this.current = value;
+
+        // So'zlar rejimida oxirgi so'z to'g'ri terilishi bilan mashq yakunlanadi.
+        const isLastWord = this.config.mode === 'words' && this.index === this.words.length - 1;
+        if (isLastWord && isTypedWordCorrect(this.current, target)) this.commit(elapsedMs);
+    }
+
+    /** Bo'sh joy: joriy so'zni yakunlab, keyingisiga o'tadi. */
+    commitWord(elapsedMs = 0) {
+        if (this.finished || this.current === '') return;
+        this.keystroke(true);
+        this.commit(elapsedMs);
+    }
+
+    private commit(elapsedMs: number) {
+        this.typed.push(this.current);
+        this.current = '';
+        if (this.config.mode === 'words' && this.typed.length >= this.words.length) {
+            this.finish(elapsedMs);
+        } else {
+            this.fill();
+        }
+    }
+
+    /** Bo'sh holatda o'chirish: oldingi so'z xato terilgan bo'lsa, unga qaytadi. */
+    backToPreviousWord(): boolean {
+        if (this.finished || this.current !== '' || this.typed.length === 0) return false;
+        const previous = this.typed[this.typed.length - 1];
+        if (isTypedWordCorrect(previous, this.words[this.typed.length - 1])) return false;
+        this.typed.pop();
+        this.current = previous;
+        return true;
+    }
+
+    /**
+     * Muntazam chaqiriladi: har soniyada grafik uchun kesim yozadi va vaqt
+     * rejimida belgilangan vaqt tugagach mashqni yakunlaydi.
+     */
+    tick(elapsedMs: number) {
+        if (!this.started || this.finished) return;
+        const second = Math.floor(elapsedMs / 1000);
+        if (second > this.samples.length) {
+            this.samples.push({
+                second,
+                wpm: this.stats(elapsedMs).wpm,
+                raw: this.secondKeys * 12,
+                errors: this.secondErrors,
+            });
+            this.secondKeys = 0;
+            this.secondErrors = 0;
+        }
+        if (this.config.mode === 'time' && second >= this.config.amount) {
+            this.finish(this.config.amount * 1000);
+        }
+    }
+
+    private finish(elapsedMs: number) {
+        this.finished = true;
+        this.finishedAt = elapsedMs;
+    }
+
+    stats(elapsedMs: number): TypingStats {
+        let correct = 0;
+        let incorrect = 0;
+        let extra = 0;
+        let missed = 0;
+        let wpmChars = 0;
+
+        for (let i = 0; i < this.typed.length; i++) {
+            const input = this.typed[i];
+            const word = this.words[i];
+            const shared = Math.min(input.length, word.length);
+            for (let j = 0; j < shared; j++) {
+                if (isSameTypingChar(input[j], word[j])) correct++;
+                else incorrect++;
+            }
+            if (input.length > word.length) extra += input.length - word.length;
+            if (input.length < word.length) missed += word.length - input.length;
+
+            if (isTypedWordCorrect(input, word)) {
+                // So'zdan keyingi bo'sh joy ham hisobga olinadi (eng oxirgi so'zdan tashqari).
+                const hasSpace = this.config.mode === 'time' || i < this.words.length - 1;
+                wpmChars += word.length + (hasSpace ? 1 : 0);
+            }
+        }
+
+        // Vaqt tugaganda yarim terilgan so'z: xatosiz bo'lsa, hisobga qo'shiladi.
+        if (this.current !== '') {
+            const word = this.target;
+            let prefixCorrect = this.current.length <= word.length;
+            for (let j = 0; j < this.current.length; j++) {
+                if (j < word.length && isSameTypingChar(this.current[j], word[j])) {
+                    correct++;
+                } else if (j < word.length) {
+                    incorrect++;
+                    prefixCorrect = false;
+                } else {
+                    extra++;
+                }
+            }
+            if (prefixCorrect) wpmChars += this.current.length;
+        }
+
+        const minutes = elapsedMs / 60000;
+        const keys = this.correctKeys + this.incorrectKeys;
+
+        return {
+            wpm: minutes <= 0 ? 0 : wpmChars / 5 / minutes,
+            raw: minutes <= 0 ? 0 : keys / 5 / minutes,
+            accuracy: keys === 0 ? 0 : (this.correctKeys / keys) * 100,
+            consistency: this.consistency(),
+            correctChars: correct,
+            incorrectChars: incorrect,
+            extraChars: extra,
+            missedChars: missed,
+        };
+    }
+
+    private consistency(): number {
+        if (this.samples.length < 2) return 0;
+        const values = this.samples.map(s => s.raw);
+        const mean = values.reduce((a, b) => a + b, 0) / values.length;
+        if (mean <= 0) return 0;
+        const variance = values.reduce((sum, v) => sum + (v - mean) ** 2, 0) / values.length;
+        return (1 - Math.min(1, Math.sqrt(variance) / mean)) * 100;
+    }
+}

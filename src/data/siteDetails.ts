@@ -1,6 +1,7 @@
 export const siteDetails = {
     siteName: 'Imlo Go',
     siteUrl: 'https://imlogo.uz/',
+    telegramChannel: 'https://t.me/imlogo',
     metadata: {
         title: 'Imlo Go — O‘zbek tilidagi online diktant va imlo tekshirish platformasi | imlogo.uz',
         description: `Imlo Go — bu O‘zbekiston bo‘yicha birinchi raqamli o‘zbek tili diktant platformasi bo‘lib, foydalanuvchilarga matn yozish, imlo xatolarini aniqlash va o‘rganishni birlashtiradi. Ilova orqali foydalanuvchilar ovozli matn (audio diktant) eshitib, uni yozma shaklda kiritishadi. So‘ng, sun’iy intellekt yordamida yozilgan matn avtomatik tahlil qilinadi, har bir imlo xatosi ko‘rsatiladi va foydalanuvchining saviyasi baholanadi. 
@@ -13,6 +14,7 @@ export const siteDetails = {
             'diktant yozish', 'imlo tekshiruvchi', 'oʻzbekcha imlo', 'matn yozish',
             'sun’iy intellekt diktant', 'oʻzbekcha test', 'ta’lim ilovalari',
             'talaba uchun ilova', 'oʻquvchi diktant ilova', 'mobil diktant ilovasi',
+            'tez yozish', 'oʻzbekcha tez yozish mashqi', 'klaviaturada tez yozish',
         ],
         author: 'Imlo Go Team',
         openGraph: {
@@ -32,6 +34,6 @@ export const siteDetails = {
     ,
     language: 'uz',
     locale: 'uz-UZ',
-    siteLogo: `${process.env.BASE_PATH || ''}/images/logo.png`, // or use a string for the logo e.g. "TechStartup"
+    siteLogo: `${process.env.BASE_PATH || ''}/images/logo.svg`,
     googleAnalyticsId: '', // e.g. G-XXXXXXX,
 }

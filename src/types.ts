@@ -13,7 +13,7 @@ export interface IBenefit {
 export interface IBenefitBullet {
     title: string;
     description: string;
-    icon: JSX.Element;
+    icon: React.ReactElement<{ size?: number }>;
 }
 
 export interface IPricing {
@@ -36,7 +36,8 @@ export interface ITestimonial {
 
 export interface IStats {
     title: string;
-    icon: JSX.Element;
+    label: string;
+    icon: React.ReactElement<{ size?: number }>;
     description: string;
 }
 

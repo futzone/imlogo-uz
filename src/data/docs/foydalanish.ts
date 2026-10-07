@@ -97,4 +97,26 @@ Baholash algoritmi tinish belgilari, bosh harflar va maxsus o'zbek belgilarini h
 
 **Offline ishlaydi mi?**
 Audio tinglash uchun internet kerak. Lekin saqlangan natijalarni oflayn rejimda ham ko'rishingiz mumkin.
+
+## Tez yozish mashqi
+
+Ilovaning **"Tez yozish"** bo'limida o'zbekcha so'zlarni tez va xatosiz terishni mashq qilishingiz mumkin.
+
+1. Yuqoridagi paneldan rejimni tanlang: **vaqt** (15, 30, 60 yoki 120 soniya) yoki **so'zlar** (10, 25, 50 yoki 100 ta so'z)
+2. Xohlasangiz, **tinish belgilari** va **raqamlar**ni yoqing
+3. Yozishni boshlang — vaqt birinchi harf terilganda boshlanadi
+4. Har bir so'zdan keyin **bo'sh joy** (probel) bosing
+5. Mashq oxirida natija ko'rsatiladi
+
+| Ko'rsatkich | Ma'nosi |
+|-------------|---------|
+| **WPM** | Daqiqasiga to'g'ri terilgan so'zlar soni (5 ta belgi = 1 so'z) |
+| **Aniqlik** | To'g'ri bosilgan klavishlar foizi |
+| **Xom tezlik** | Xatolar hisobga olinmagan tezlik |
+| **Belgilar** | To'g'ri / xato / ortiqcha / tushib qolgan belgilar soni |
+| **Barqarorlik** | Tezlik mashq davomida qanchalik bir tekis bo'lgani |
+
+> **Tutuq belgisi haqida:** o', g' va tutuq belgisi uchun klaviaturangizdagi istalgan belgini (' ’ ‘ ʻ \`) ishlatishingiz mumkin — tez yozish mashqida ularning barchasi to'g'ri deb qabul qilinadi.
+
+Kompyuterda **Tab** tugmasi mashqni qayta boshlaydi. Barcha natijalar qurilmangizda saqlanadi va **"Natijalarim" → "Tez yozish"** bo'limida ko'rinadi.
 `;

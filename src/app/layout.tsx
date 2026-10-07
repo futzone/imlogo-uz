@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { GoogleAnalytics } from '@next/third-parties/google';
-import { Source_Sans_3, Manrope } from "next/font/google";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import { Fredoka, Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import { siteDetails } from '@/data/siteDetails';
 import "./globals.css";
-import CharacterCursor from "@/components/CharacterCursor";
 
-const manrope = Manrope({ subsets: ['latin'] });
-const sourceSans = Source_Sans_3({ subsets: ['latin'] });
+const heading = Space_Grotesk({ subsets: ['latin', 'latin-ext'], variable: '--font-heading', display: 'swap' });
+const body = Inter({ subsets: ['latin', 'latin-ext'], variable: '--font-body', display: 'swap' });
+// Faqat logotip uchun
+const logo = Fredoka({ subsets: ['latin'], weight: '700', variable: '--font-logo', display: 'swap' });
+const mono = JetBrains_Mono({ subsets: ['latin', 'latin-ext'], variable: '--font-mono', display: 'swap' });
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://imlogo.uz'),
@@ -68,18 +68,12 @@ export default function RootLayout({
     <html lang="uz">
       <head>
         <meta name="google-site-verification" content="G6pz2wyPxNp4awm1mHbtfuCD75sbYU0soGlXvySux9E" />
-        <link rel="canonical" href="https://imlogo.uz" />
       </head>
       <body
-        className={`${manrope.className} ${sourceSans.className} antialiased`}
+        className={`${heading.variable} ${body.variable} ${mono.variable} ${logo.variable} antialiased`}
       >
         {siteDetails.googleAnalyticsId && <GoogleAnalytics gaId={siteDetails.googleAnalyticsId} />}
-        <Header />
-        <main>
-          <CharacterCursor />
-          {children}
-        </main>
-        <Footer />
+        {children}
 
         {/* JSON-LD Structured Data */}
         <script
@@ -90,7 +84,7 @@ export default function RootLayout({
               '@type': 'WebApplication',
               name: 'Imlo Go',
               url: 'https://imlogo.uz',
-              description: "O'zbek tilidagi birinchi raqamli diktant tekshiruvchi platforma",
+              description: "O'zbek tilidagi birinchi raqamli diktant tekshiruvchi platforma va o'zbekcha so'zlarda tez yozish mashqi",
               applicationCategory: 'EducationalApplication',
               operatingSystem: 'Web, Windows, Android, iOS',
               offers: {

@@ -4,6 +4,7 @@ export const footerDetails: {
     subheading: string;
     quickLinks: IMenuItem[];
     email: string;
+    telegram: string;
     telephone: string;
     socials: ISocials;
 } = {
@@ -11,14 +12,23 @@ export const footerDetails: {
     quickLinks: [
         {
             text: "Dastur haqida",
-            url: "#features"
+            url: "/#features"
+        },
+        {
+            text: "Tez yozish",
+            url: "/#tez-yozish"
         },
         {
             text: "Fikrlar",
-            url: "#testimonials"
+            url: "/#testimonials"
+        },
+        {
+            text: "Qo'llanma",
+            url: "/qollanma"
         }
     ],
     email: 'abdumalikovagulshoda2403@gmail.com',
+    telegram: 'https://t.me/Qahor0v_bot',
     telephone: '+99899999999',
     socials: {
         // github: 'https://github.com',

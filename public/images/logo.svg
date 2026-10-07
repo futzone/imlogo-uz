@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 415 78" width="100%" height="100%">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@700&amp;display=swap');
+
+      .imlogo-text {
+        font-family: 'Fredoka', 'Nunito', 'Arial Rounded MT Bold', sans-serif;
+        font-size: 100px;
+        font-weight: 700;
+      }
+
+      .brand-purple {
+        fill: #AF6EFF;
+      }
+
+      .brand-black {
+        fill: #000000;
+      }
+    </style>
+  </defs>
+
+  <text x="0" y="74" class="imlogo-text">
+    <tspan class="brand-purple">IMLO</tspan><tspan class="brand-black">GO</tspan>
+  </text>
+</svg>

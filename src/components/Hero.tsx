@@ -3,76 +3,123 @@
 import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { LuArrowRight } from 'react-icons/lu';
 
 import AppStoreButton from './AppStoreButton';
 import PlayStoreButton from './PlayStoreButton';
 import WindowsButton from './WindowsButton';
+import Badge from './ui/Badge';
+import Button from './ui/Button';
 import { heroDetails } from '@/data/hero';
+import { stats } from '@/data/stats';
+
+const fadeUp = (delay: number) => ({
+    initial: { opacity: 0, y: 24 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.6, delay, ease: 'easeOut' },
+});
+
+// Skrinshot atrofida suzuvchi statistik kartalarning joylashuvi
+const floatingCards = [
+    'left-0 top-[12%] lg:-left-10 animate-float',
+    'right-0 top-[38%] lg:-right-12 animate-float-slow',
+    'left-[4%] bottom-[10%] lg:-left-4 animate-float-slow',
+];
 
 const Hero: React.FC = () => {
     return (
         <section
             id="hero"
-            className="relative flex items-center justify-center pb-0 pt-36 md:pt-48 px-5 overflow-hidden min-h-[80vh]"
+            className="relative overflow-hidden px-5 pb-10 pt-32 md:pt-44"
         >
-            {/* Warm gradient background — purple top-left → cream/light */}
-            <div className="absolute inset-0 -z-10 hero-gradient" />
+            {/* Iliq gradient fon — binafsha (yuqori-chap) → sarg'ish */}
+            <div className="absolute inset-0 -z-20 hero-gradient" />
+            {/* Katak naqsh */}
+            <div className="absolute inset-0 -z-10 bg-grid-pattern" />
+            {/* Pastga qarab oq rangga o'tish */}
+            <div className="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-b from-transparent to-background" />
 
-            {/* Bottom fade to white */}
-            <div className="absolute left-0 right-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-white z-10" />
+            <div className="relative mx-auto max-w-7xl text-center">
+                <motion.div {...fadeUp(0)}>
+                    <Badge pulse>{heroDetails.badge}</Badge>
+                </motion.div>
 
-            {/* Content */}
-            <div className="text-center relative z-20 max-w-5xl mx-auto">
-                {/* Large bold heading */}
                 <motion.h1
-                    className="text-5xl md:text-7xl lg:text-8xl font-extrabold text-foreground leading-tight md:leading-tight lg:leading-tight max-w-4xl mx-auto"
-                    initial={{ opacity: 0, y: 25 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, ease: 'easeOut' }}
+                    className="mx-auto mt-6 max-w-5xl text-4xl font-bold tracking-tight text-balance sm:text-5xl md:text-7xl"
+                    {...fadeUp(0.1)}
                 >
-                    {heroDetails.heading}
+                    {heroDetails.heading}{' '}
+                    <span className="text-gradient">{heroDetails.headingAccent}</span>
                 </motion.h1>
 
-                {/* Subheading */}
                 <motion.p
-                    className="mt-6 md:mt-8 text-foreground-accent max-w-2xl mx-auto text-lg md:text-xl leading-relaxed"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, delay: 0.15, ease: 'easeOut' }}
+                    className="mx-auto mt-6 max-w-2xl text-base text-muted md:text-lg"
+                    {...fadeUp(0.2)}
                 >
                     {heroDetails.subheading}
                 </motion.p>
 
-                {/* Download buttons */}
+                <motion.div className="mt-8 flex justify-center" {...fadeUp(0.3)}>
+                    <Button href={heroDetails.appUrl} size="lg">
+                        Brauzerda sinab ko&apos;rish
+                        <LuArrowRight size={18} aria-hidden />
+                    </Button>
+                </motion.div>
+
                 <motion.div
-                    className="mt-8 md:mt-10 flex flex-col sm:flex-row items-center sm:gap-4 w-fit mx-auto"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, delay: 0.3, ease: 'easeOut' }}
+                    className="mx-auto mt-6 flex w-full max-w-xs flex-col items-center gap-3 sm:max-w-none sm:flex-row sm:justify-center sm:gap-4"
+                    {...fadeUp(0.4)}
                 >
                     <AppStoreButton dark />
                     <PlayStoreButton dark />
                     <WindowsButton dark />
                 </motion.div>
 
-                {/* App screenshot */}
+                {/* Ilova skrinshoti: orbital halqalar va suzuvchi kartalar bilan */}
                 <motion.div
-                    className="relative mt-16 md:mt-20"
+                    className="relative mx-auto mt-14 max-w-5xl md:mt-20"
                     initial={{ opacity: 0, y: 50 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.9, delay: 0.5, ease: 'easeOut' }}
                 >
+                    <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center">
+                        <div className="absolute h-[70%] w-[70%] rounded-full bg-primary opacity-20 blur-[120px]" />
+                        <div className="absolute aspect-square h-[115%] rounded-full border border-dashed border-primary/30 animate-spin-slow" />
+                        <div className="absolute aspect-square h-[85%] rounded-full border border-secondary/20 animate-spin-slower">
+                            <span className="absolute -top-1.5 left-1/2 h-3 w-3 rounded-full bg-secondary shadow-glow-lg" />
+                        </div>
+                    </div>
+
                     <Image
                         src={heroDetails.centerImageSrc}
                         width={1100}
-                        height={800}
+                        height={715}
                         quality={100}
                         sizes="(max-width: 768px) 100vw, 1000px"
                         priority={true}
                         unoptimized={true}
-                        alt="app mockup"
-                        className="w-full mx-auto"
+                        alt="Imlo Go ilovasining bosh sahifasi: diktantlar ro‘yxati"
+                        className="mx-auto w-full"
                     />
+
+                    {stats.map((stat, index) => (
+                        <div
+                            key={stat.title}
+                            className={`glass absolute hidden items-center gap-3 rounded-2xl px-4 py-3 text-left shadow-glow-soft md:flex ${floatingCards[index]}`}
+                        >
+                            <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/30 bg-primary/10 text-primary">
+                                {stat.icon}
+                            </span>
+                            <span>
+                                <span className="block font-mono text-xl font-medium leading-none text-foreground">
+                                    {stat.title}
+                                </span>
+                                <span className="mt-1 block font-mono text-[10px] uppercase tracking-widest text-muted">
+                                    {stat.label}
+                                </span>
+                            </span>
+                        </div>
+                    ))}
                 </motion.div>
             </div>
         </section>
