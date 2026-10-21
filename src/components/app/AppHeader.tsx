@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { LuHistory, LuInfo, LuSmartphone } from 'react-icons/lu';
 
 import Logo from '@/components/Logo';
+import CelebrationBadge from '@/components/celebration/CelebrationBadge';
 import AboutAppsSheet from './AboutAppsSheet';
 import AppInfoSheet from './AppInfoSheet';
 import SectionTabs, { appSections } from './SectionTabs';
@@ -24,6 +25,7 @@ const AppHeader: React.FC = () => {
                     <Link href="/app" className="flex shrink-0 items-center" aria-label="Imlo Go — ilova bosh sahifasi">
                         <Logo className="h-6 sm:h-7" />
                     </Link>
+                    <CelebrationBadge compact className="ml-2 hidden sm:inline-flex" />
                     <nav className="ml-3 hidden md:block" aria-label="Bo‘limlar">
                         <SectionTabs index={index} />
                     </nav>

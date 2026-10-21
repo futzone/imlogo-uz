@@ -9,6 +9,8 @@ import AppStoreButton from './AppStoreButton';
 import PlayStoreButton from './PlayStoreButton';
 import WindowsButton from './WindowsButton';
 import Badge from './ui/Badge';
+import CelebrationBadge from './celebration/CelebrationBadge';
+import CelebrationBanner from './celebration/CelebrationBanner';
 import Button from './ui/Button';
 import { heroDetails } from '@/data/hero';
 import { stats } from '@/data/stats';
@@ -41,7 +43,11 @@ const Hero: React.FC = () => {
 
             <div className="relative mx-auto max-w-7xl text-center">
                 <motion.div {...fadeUp(0)}>
-                    <Badge pulse>{heroDetails.badge}</Badge>
+                    <CelebrationBanner className="mx-auto mb-8 max-w-3xl" />
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                        <CelebrationBadge />
+                        <Badge pulse>{heroDetails.badge}</Badge>
+                    </div>
                 </motion.div>
 
                 <motion.h1
