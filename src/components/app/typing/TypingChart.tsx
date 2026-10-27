@@ -4,11 +4,16 @@ import { TypingSample } from '@/lib/app/typing/engine';
  * Mashq davomidagi tezlik grafigi: WPM (gradient chiziq), xom tezlik
  * (kulrang chiziq) va xato qilingan soniyalar (qizil nuqtalar).
  */
-const TypingChart: React.FC<{ samples: TypingSample[] }> = ({ samples }) => {
+const TypingChart: React.FC<{
+    samples: TypingSample[];
+    /** X o'qi yorlig'i (standart — soniyalar). */
+    xLabel?: (value: number) => string;
+    emptyText?: string;
+}> = ({ samples, xLabel = value => `${value}s`, emptyText = 'Grafik uçun maşq juda qisqa böldi' }) => {
     if (samples.length < 2) {
         return (
             <p className="flex h-full items-center justify-center text-center font-mono text-xs font-medium text-muted">
-                Grafik uchun mashq juda qisqa bo‘ldi
+                {emptyText}
             </p>
         );
     }
@@ -29,7 +34,7 @@ const TypingChart: React.FC<{ samples: TypingSample[] }> = ({ samples }) => {
         <div
             className="relative h-full w-full"
             role="img"
-            aria-label={`Tezlik grafigi: ${samples.length} soniya, eng yuqori ko‘rsatkich ${Math.round(peak)} WPM`}
+            aria-label={`Tezlik grafigi: ${samples.length} nuqta, eng yuqori körsatkiç ${Math.round(peak)} WPM`}
         >
             {[0, 1, 2].map(step => (
                 <span
@@ -40,8 +45,8 @@ const TypingChart: React.FC<{ samples: TypingSample[] }> = ({ samples }) => {
                     {Math.round((maxY * step) / 2)}
                 </span>
             ))}
-            <span className={`${labelClass} bottom-0 left-[34px]`}>1s</span>
-            <span className={`${labelClass} bottom-0 right-0`}>{samples[samples.length - 1].second}s</span>
+            <span className={`${labelClass} bottom-0 left-[34px]`}>{xLabel(samples[0].second)}</span>
+            <span className={`${labelClass} bottom-0 right-0`}>{xLabel(samples[samples.length - 1].second)}</span>
 
             <div className="absolute bottom-5 left-[34px] right-0 top-2">
                 {[0, 50, 100].map(top => (

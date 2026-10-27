@@ -3,37 +3,26 @@ export const siteDetails = {
     siteUrl: 'https://imlogo.uz/',
     telegramChannel: 'https://t.me/imlogo',
     metadata: {
-        title: 'Imlo Go — O‘zbek tilidagi online diktant va imlo tekshirish platformasi | imlogo.uz',
-        description: `Imlo Go — bu O‘zbekiston bo‘yicha birinchi raqamli o‘zbek tili diktant platformasi bo‘lib, foydalanuvchilarga matn yozish, imlo xatolarini aniqlash va o‘rganishni birlashtiradi. Ilova orqali foydalanuvchilar ovozli matn (audio diktant) eshitib, uni yozma shaklda kiritishadi. So‘ng, sun’iy intellekt yordamida yozilgan matn avtomatik tahlil qilinadi, har bir imlo xatosi ko‘rsatiladi va foydalanuvchining saviyasi baholanadi. 
-      
-      Imlo Go o‘quvchilar, talabalar, o‘qituvchilar, til o‘rganayotganlar va yozma savodxonligini oshirmoqchi bo‘lgan har bir kishi uchun mo‘ljallangan. Ilova foydalanuvchilarga o‘z o‘sishini kuzatish, tarixiy natijalarni ko‘rish va har bir mashg‘ulotdan keyin tahlil olish imkonini beradi. 
-      
-      Shuningdek, Imlo Go’da real vaqtda ishlaydigan foydalanuvchi interfeysi, zamonaviy va qulay dizayn, mobil va desktop versiyalar mavjud. Platforma doimiy yangilanib boriladi va O‘zbek tilining rivojiga xizmat qiladi. Imlo Go yordamida imlo xatolaringizni yo‘qotish, to‘g‘ri yozishni o‘rganish va diktant orqali til bilimlaringizni mukammallashtirishingiz mumkin. Diktantlar maktab, universitet yoki mustaqil o‘rganish uchun moslashtirilgan.`,
+        title: 'Imlo Go — özbekça diktant, tez yoziş va yangi alifbo translatori',
+        description: 'Imlo Go — özbek tili imlosi uçun bepul platforma: audio diktantni avtomatik tekşiriş, özbekça tez yoziş maşqi, kirill, lotin va yangi alifbo (Ş, Ç, Ö, Ğ) orasida translator hamda hamjamiyat reytingi.',
         keywords: [
-            'imlo go', 'imlogo.uz', 'oʻzbekcha diktant', 'audio diktant', 'oʻzbek tili ilova',
-            'diktant yozish', 'imlo tekshiruvchi', 'oʻzbekcha imlo', 'matn yozish',
-            'sun’iy intellekt diktant', 'oʻzbekcha test', 'ta’lim ilovalari',
-            'talaba uchun ilova', 'oʻquvchi diktant ilova', 'mobil diktant ilovasi',
-            'tez yozish', 'oʻzbekcha tez yozish mashqi', 'klaviaturada tez yozish',
+            'imlo go', 'imlogo', 'o‘zbekcha diktant', 'online diktant', 'audio diktant', 'imlo tekshirish',
+            'o‘zbek tili imlosi', 'yangi o‘zbek alifbosi', 'yangi alifbo', 'Ş Ç Ö Ğ', 'kirilldan lotinga',
+            'lotindan kirillga', 'krill lotin translator', 'o‘zbekcha transliteratsiya', 'yangi alifboga o‘girish',
+            'tez yozish', 'o‘zbekcha tez yozish', 'klaviaturada tez yozish', 'wpm test', 'typing test uzbek',
         ],
         author: 'Imlo Go Team',
         openGraph: {
-            title: 'Imlo Go — O‘zbek tilidagi online diktant ilovasi',
-            description: 'Audio eshiting, matn yozing, imlo xatolarni avtomatik aniqlang. Talabalar, o‘quvchilar va o‘qituvchilar uchun zamonaviy o‘zbek diktant platformasi.',
-            url: 'https://imlogo.uz',
-            image: 'https://imlogo.uz/og-image.jpg',
-            type: 'website',
+            title: 'Imlo Go — özbek tili imlosi uçun bepul platforma',
+            description: 'Audio diktant, özbekça tez yoziş va kirill · lotin · yangi alifbo translatori. Natijalaringizni kuzating va hamjamiyat bilan bellaşing.',
         },
         twitter: {
-            card: 'summary_large_image',
-            title: 'Imlo Go — O‘zbekcha audio diktant platformasi',
-            description: 'Ovozli diktantni eshitib yozing, tizim esa xatolaringizni ko‘rsatib beradi. Til o‘rganishni yangi bosqichga olib chiqing!',
-            image: 'https://imlogo.uz/twitter-card.jpg',
-        }
-    }
-    ,
+            title: 'Imlo Go — özbek tili imlosi uçun bepul platforma',
+            description: 'Audio diktant, tez yoziş maşqi va yangi alifbo translatori — barçasi bepul.',
+        },
+    },
     language: 'uz',
-    locale: 'uz-UZ',
+    locale: 'uz_UZ',
     siteLogo: `${process.env.BASE_PATH || ''}/images/logo.svg`,
     googleAnalyticsId: '', // e.g. G-XXXXXXX,
 }

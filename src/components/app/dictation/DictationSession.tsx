@@ -5,12 +5,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { LuCheck, LuCloudOff, LuGauge, LuPause, LuPlay, LuRotateCcw, LuTimer } from 'react-icons/lu';
 import clsx from 'clsx';
 
+import { uploadWork } from '@/lib/app/account';
 import { findLoadedDictation } from '@/lib/app/dictationStore';
 import { DiktantEvaluator } from '@/lib/app/evaluator';
 import { formatTime } from '@/lib/app/format';
 import { fetchDictation } from '@/lib/app/pocketbase';
 import { saveWork } from '@/lib/app/storage';
-import { Dictation } from '@/lib/app/types';
+import { invalidateHistory } from '@/lib/app/history';
+import { Dictation, Work } from '@/lib/app/types';
+import { useAuth } from '../auth/AuthProvider';
 import { Modal, ModalTitle } from '../Overlay';
 import PageScaffold from '../PageScaffold';
 import { AppButton, EmptyState, Spinner } from '../ui';
@@ -36,9 +39,9 @@ const DictationSession: React.FC<{ id: string }> = ({ id }) => {
     return (
         <PageScaffold title="Diktant">
             {failed ? (
-                <EmptyState icon={<LuCloudOff aria-hidden />} tone="danger" text="Diktantni yuklab bo‘lmadi">
+                <EmptyState icon={<LuCloudOff aria-hidden />} tone="danger" text="Diktantni yuklab bölmadi">
                     <AppButton variant="outline" href="/app">
-                        Bosh sahifaga
+                        Boş sahifaga
                     </AppButton>
                 </EmptyState>
             ) : (
@@ -63,6 +66,7 @@ const Session: React.FC<{ dictation: Dictation }> = ({ dictation }) => {
     const [duration, setDuration] = useState(0);
     const [slow, setSlow] = useState(false);
     const [confirmExit, setConfirmExit] = useState(false);
+    const { account } = useAuth();
 
     useEffect(() => {
         // Brauzer avtomatik ijroga ruxsat bermasa, pleyer to'xtatilgan holatda qoladi.
@@ -118,7 +122,7 @@ const Session: React.FC<{ dictation: Dictation }> = ({ dictation }) => {
         const evaluator = new DiktantEvaluator(dictation.text, input);
         evaluator.analyze();
 
-        saveWork({
+        const work: Work = {
             id: dictation.id,
             createdDate: new Date().toISOString(),
             ball: evaluator.evaluate100PointScale(),
@@ -131,7 +135,11 @@ const Session: React.FC<{ dictation: Dictation }> = ({ dictation }) => {
             grafikErrorCount: evaluator.grafikErrorCount,
             worktime: totalSeconds - remaining,
             input,
-        });
+        };
+        saveWork(work);
+        // Kirgan foydalanuvchi natijasi hisobga ham yoziladi; yozilmasa, "Natijalarim"dan keyin yuklanadi.
+        if (account) uploadWork(account.id, work).catch(() => undefined).finally(invalidateHistory);
+        else invalidateHistory();
 
         leavingRef.current = true;
         // "Orqaga" bosilganda yozish sahifasiga qaytilmasligi uchun tarixdagi yozuv almashtiriladi.
@@ -162,7 +170,7 @@ const Session: React.FC<{ dictation: Dictation }> = ({ dictation }) => {
             <PlayerButton badge="15s" tooltip="15 soniya orqaga" onClick={() => seek(Math.floor(position) - 15)}>
                 <LuRotateCcw aria-hidden />
             </PlayerButton>
-            <PlayerButton filled tooltip={isPlaying ? 'To‘xtatish' : 'Davom ettirish'} onClick={togglePlay}>
+            <PlayerButton filled tooltip={isPlaying ? 'Töxtatiş' : 'Davom ettiriş'} onClick={togglePlay}>
                 {isPlaying ? <LuPause aria-hidden /> : <LuPlay aria-hidden />}
             </PlayerButton>
         </div>
@@ -223,7 +231,7 @@ const Session: React.FC<{ dictation: Dictation }> = ({ dictation }) => {
                 htmlFor="dictation-input"
                 className="mt-6 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-muted"
             >
-                Diktant matnini kiritish
+                Diktant matnini kiritiş
             </label>
             <textarea
                 id="dictation-input"
@@ -239,24 +247,24 @@ const Session: React.FC<{ dictation: Dictation }> = ({ dictation }) => {
 
             <div className="mt-6 flex flex-col-reverse items-center gap-3 sm:flex-row sm:justify-end sm:gap-4">
                 <AppButton variant="danger" onClick={() => setConfirmExit(true)}>
-                    Bekor qilish
+                    Bekor qiliş
                 </AppButton>
                 <AppButton onClick={complete} trailingIcon={<LuCheck size={18} aria-hidden />}>
-                    Diktantni yakunlash
+                    Diktantni yakunlaş
                 </AppButton>
             </div>
 
             <Modal open={confirmExit} onClose={() => setConfirmExit(false)} className="max-w-md">
-                <ModalTitle className="font-heading text-lg font-bold">Diktantni bekor qilish</ModalTitle>
+                <ModalTitle className="font-heading text-lg font-bold">Diktantni bekor qiliş</ModalTitle>
                 <p className="mt-3 text-[15px] text-muted">
-                    Diktant hali yakunlanmagan. Chiqib ketsangiz, natijalar saqlanmaydi. Chiqishni xohlaysizmi?
+                    Diktant hali yakunlanmagan. Çiqib ketsangiz, natijalar saqlanmaydi. Çiqişni xohlaysizmi?
                 </p>
                 <div className="mt-6 flex flex-wrap justify-end gap-2">
                     <AppButton variant="ghost" onClick={() => setConfirmExit(false)}>
-                        Yo‘q, davom etish
+                        Yöq, davom etiş
                     </AppButton>
                     <AppButton variant="danger" onClick={exit}>
-                        Ha, chiqish
+                        Ha, çiqiş
                     </AppButton>
                 </div>
             </Modal>

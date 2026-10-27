@@ -22,8 +22,8 @@ const Header: React.FC = () => {
             <div className="max-w-5xl mx-auto mt-3 md:mt-4 px-4 md:px-5">
                 {/* Pill shaklidagi shisha navbar */}
                 <nav className="glass rounded-full flex justify-between items-center py-2 pl-5 pr-2 md:pl-6 shadow-glow-soft">
-                    <Link href="/" className="flex items-center" aria-label="Imlo Go — bosh sahifa">
-                        <Logo className="h-6 md:h-7" />
+                    <Link href="/" className="flex items-center" aria-label="Imlo Go — boş sahifa">
+                        <Logo className="h-[19px] md:h-[22px]" />
                     </Link>
 
                     <ul className="hidden md:flex items-center gap-6">
@@ -41,7 +41,7 @@ const Header: React.FC = () => {
 
                     <div className="flex items-center gap-2">
                         <Button href={heroDetails.appUrl} size="sm">
-                            Sinab ko&apos;rish
+                            Sinab köriş
                         </Button>
                         <button
                             onClick={toggleMenu}

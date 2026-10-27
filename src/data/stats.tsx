@@ -5,20 +5,20 @@ import { IStats } from "@/types";
 export const stats: IStats[] = [
     {
         title: "2K+",
-        label: "Foydalanuvchi",
+        label: "Foydalanuvçi",
         icon: <LuUsers size={22} />,
-        description: "Foydalanuvchilarimiz soni har kun, har soat, har daqiqa, har soniya o‘sib bormoqda."
+        description: "Foydalanuvçilarimiz soni har kun, har soat, har daqiqa, har soniya ösib bormoqda."
     },
     {
         title: "5.0",
         label: "Baho",
         icon: <LuStar size={22} />,
-        description: "Tizimni ishlatib ko‘rganlarning ko‘pchiligi juda yaxshi fikrda."
+        description: "Tizimni işlatib körganlarning köpçiligi juda yaxşi fikrda."
     },
     {
         title: "Turli",
         label: "Darajalar",
         icon: <LuLibrary size={22} />,
-        description: "Katta audio va matn ma’lumotlar bazasi bilan ishlaymiz. Har kuni yangi diktantlar qo‘shamiz."
+        description: "Katta audio va matn ma’lumotlar bazasi bilan işlaymiz. Har kuni yangi diktantlar qöşamiz."
     }
 ];

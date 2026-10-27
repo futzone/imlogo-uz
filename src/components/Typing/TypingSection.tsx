@@ -45,7 +45,7 @@ const TypingSection: React.FC = () => {
 
                 <Reveal className="mt-10 flex justify-center">
                     <Button href={typingDetails.appUrl} size="lg">
-                        Ilovada to‘liq mashq qilish
+                        Ilovada töliq maşq qiliş
                         <LuArrowRight size={18} aria-hidden />
                     </Button>
                 </Reveal>

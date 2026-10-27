@@ -1,47 +1,44 @@
-"use client"
-import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
-import { BiMinus, BiPlus } from "react-icons/bi";
+"use client";
 
-import SectionTitle from "./SectionTitle";
+import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
+import { LuChevronDown } from "react-icons/lu";
+
+import Reveal from "./ui/Reveal";
+import SectionHeading from "./ui/SectionHeading";
 import { faqs } from "@/data/faq";
 
-const FAQ: React.FC = () => {
-    return (
-        <section id="faq" className="py-10 lg:py-20">
-            <div className="flex flex-col lg:flex-row gap-10">
-                <div className="">
-                    <p className="hidden lg:block text-foreground-accent">FAQ&apos;S</p>
-                    <SectionTitle>
-                        <h2 className="my-3 !leading-snug lg:max-w-sm text-center lg:text-left">Frequently Asked Questions</h2>
-                    </SectionTitle>
-                    <p className="lg:mt-10 text-foreground-accent text-center lg:text-left">
-                        Ask us anything!
-                    </p>
-                    <a href="mailto:" className="mt-3 block text-xl lg:text-4xl text-secondary font-semibold hover:underline text-center lg:text-left">help@finwise.com</a>
-                </div>
+/** Savol-javoblar. Qidiruv tizimlari uchun FAQPage tuzilmaviy ma'lumoti `page.tsx` da qo'shiladi. */
+const FAQ: React.FC = () => (
+    <section id="savollar" className="bg-surface py-20 md:py-24">
+        <div className="mx-auto max-w-3xl px-5">
+            <Reveal>
+                <SectionHeading
+                    eyebrow="Savol-javoblar"
+                    title="Köp beriladigan"
+                    accent="savollar"
+                    description="Javob topa olmadingizmi? Telegram kanalimizga yozing yoki ilovadagi «Murojaat qoldiriş» tugmasidan foydalaning."
+                />
+            </Reveal>
 
-                <div className="w-full lg:max-w-2xl mx-auto border-b">
-                    {faqs.map((faq, index) => (
-                        <div key={index} className="mb-7">
-                            <Disclosure>
-                                {({ open }) => (
-                                    <>
-                                        <DisclosureButton className="flex items-center justify-between w-full px-4 pt-7 text-lg text-left border-t">
-                                            <span className="text-2xl font-semibold">{faq.question}</span>
-                                            {open ? <BiMinus className="w-5 h-5 text-secondary" /> : <BiPlus className="w-5 h-5 text-secondary" />}
-                                        </DisclosureButton>
-                                        <DisclosurePanel className="px-4 pt-4 pb-2 text-foreground-accent">
-                                            {faq.answer}
-                                        </DisclosurePanel>
-                                    </>
-                                )}
-                            </Disclosure>
-                        </div>
-                    ))}
-                </div>
+            <div className="mt-12 flex flex-col gap-3">
+                {faqs.map(faq => (
+                    <Disclosure key={faq.question} as="div" className="rounded-2xl border border-line bg-white">
+                        <DisclosureButton className="group flex w-full items-center justify-between gap-4 px-5 py-4 text-left">
+                            <h3 className="font-heading text-[17px] font-semibold leading-snug">{faq.question}</h3>
+                            <LuChevronDown
+                                size={20}
+                                aria-hidden
+                                className="shrink-0 text-primary transition-transform duration-200 group-data-[open]:rotate-180"
+                            />
+                        </DisclosureButton>
+                        <DisclosurePanel className="px-5 pb-5 text-[15px] leading-relaxed text-muted">
+                            {faq.answer}
+                        </DisclosurePanel>
+                    </Disclosure>
+                ))}
             </div>
-        </section>
-    );
-};
+        </div>
+    </section>
+);
 
 export default FAQ;

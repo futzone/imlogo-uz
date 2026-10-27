@@ -7,7 +7,7 @@ const AppStoreButton = ({ dark }: { dark?: boolean }) => {
     return (
         <StoreButton
             href={ctaDetails.appStoreUrl}
-            label="iOS uchun"
+            label="iOS uçun"
             dark={dark}
             icon={
                 <svg viewBox="0 0 384 512" width="26" aria-hidden>

@@ -1,25 +1,41 @@
 import { IFAQ } from "@/types";
-import { siteDetails } from "./siteDetails";
 
+/** Landingdagi "Savol-javoblar" bo'limi va FAQPage tuzilmaviy ma'lumoti (SEO) uchun. */
 export const faqs: IFAQ[] = [
     {
-        question: `Is ${siteDetails.siteName} secure?`,
-        answer: 'Absolutely. We use bank-level encryption to protect your data and never store your login information. Plus, our biometric authentication adds an extra layer of security.',
+        question: "Imlo Go bepulmi?",
+        answer: "Ha. Diktant, tez yoziş maşqi, translator va reyting — barçasi bepul. Röyxatdan ötmasdan ham töliq foydalaniş mumkin.",
     },
     {
-        question: `Can I use ${siteDetails.siteName} on multiple devices?`,
-        answer: 'Absolutely! Your Finwise account syncs seamlessly across all your devices - smartphone, tablet, and computer.',
+        question: "Yangi özbek alifbosida nima özgaradi?",
+        answer: "Törtta harf yangi şaklga ötadi: Oʻ → Ö, Gʻ → Ğ, Sh → Ş, Ch → Ç. «ng» esa mustaqil harf sifatida alifbodan çiqariladi — n va g alohida yoziladi (tong, singil).",
     },
     {
-        question: 'Can I connect all my bank accounts?',
-        answer: `Yes! ${siteDetails.siteName} supports connections with over 10,000 financial institutions worldwide. Simply log in through our secure portal to link your accounts.`
+        question: "Kirill matnini lotin yoki yangi alifboga qanday ögiraman?",
+        answer: "Translator bölimida matnni kiriting va yönalişni tanlang: kirill, amaldagi lotin va yangi lotin orasida 6 ta yönaliş bor. Natija yoziş bilan bir vaqtda çiqadi, uni nusxalaş yoki .txt fayl qilib yuklab oliş mumkin.",
     },
     {
-        question: 'Do I need any financial expertise to use the investing features?',
-        answer: 'Not at all! Our expert-curated portfolios and educational resources make investing accessible to everyone, regardless of experience level.',
+        question: "«Ishoq», «ashob» kabi sözlar töğri ögiriladimi?",
+        answer: "Ha. Bu sözlarda «sh» bitta harf emas, alohida s va h tovuşlari. Translator 3 mingdan ortiq istisno sözlar luğatidan foydalanadi: Ishoq yangi alifboda ham Ishoq bölib qoladi, «shahar» esa «şahar» böladi. Kirillga ögirişda компьютер, цирк, район kabi sözlar ham töğri tiklanadi.",
     },
     {
-        question: 'What if I need help using the app?',
-        answer: 'Our dedicated support team is available 24/7 via chat or email. Plus, we offer extensive in-app tutorials and a comprehensive knowledge base to help you make the most of Finwise.'
-    }
+        question: "Klaviaturamda Ş, Ç, Ö, Ğ harflari yöq. Qanday yozaman?",
+        answer: "Tez yoziş maşqida bu harflarni odatdagidek «sh», «ch», «o‘», «g‘» deb terişingiz mumkin — tizim ularni avtomatik yangi harfga aylantiradi. Translatorda esa maxsus tugmalar orqali qöyiladi.",
+    },
+    {
+        question: "Diktant qanday baholanadi?",
+        answer: "Yozgan matningiz asl matn bilan sözma-söz soliştiriladi va xatolar tört turga ajratiladi: imloviy, punktuatsion, uslubiy va grafik. Natija 5 ballik baho va 100 ballik şkalada körsatiladi, har bir xato izohi bilan.",
+    },
+    {
+        question: "Hisob oçiş nima beradi?",
+        answer: "Google yoki email orqali kirsangiz, diktant va tez yoziş natijalaringiz istalgan qurilmada saqlanadi, hamjamiyat reytingi va haftalik musobaqada qatnaşasiz, profilingizda tezlik ösişi grafigi va ketma-ket kunlar (streak) körinadi.",
+    },
+    {
+        question: "Haftalik musobaqa qanday ötadi?",
+        answer: "Har duşanba 00:00 da (Toşkent vaqti) yangi hafta boşlanadi. Hafta davomida tez yoziş va diktant natijalari alohida reytingda hisoblanadi, ötgan hafta ğoliblari esa Hamjamiyat sahifasida körsatiladi.",
+    },
+    {
+        question: "Telefon yoki kompyuter uçun ilova bormi?",
+        answer: "Ha — Android, iOS va Windows uçun ilovalar bor. Brauzer versiyasi esa heç narsa örnatmasdan istalgan qurilmada işlaydi.",
+    },
 ];

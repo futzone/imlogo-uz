@@ -11,15 +11,15 @@ const Audience: React.FC<{ benefit: IBenefit }> = ({ benefit }) => {
         <section id="kimlar-uchun" className="relative overflow-hidden bg-surface py-20 md:py-24">
             <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 lg:grid-cols-2 lg:gap-20">
                 <Reveal className="order-2 lg:order-1">
-                    <PhoneShot src={benefit.imageSrc} alt="Imlo Go mobil ilovasi: diktant yozish sahifasi" />
+                    <PhoneShot src={benefit.imageSrc} alt="Imlo Go mobil ilovasi: diktant yoziş sahifasi" />
                 </Reveal>
 
                 <div className="order-1 lg:order-2">
                     <Reveal>
                         <SectionHeading
-                            eyebrow="Foydalanuvchilar"
+                            eyebrow="Foydalanuvçilar"
                             title="Bu"
-                            accent="kimlar uchun?"
+                            accent="kimlar uçun?"
                             description={benefit.description}
                             align="left"
                         />

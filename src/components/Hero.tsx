@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { LuArrowRight } from 'react-icons/lu';
+import { LuArrowRight, LuLanguages } from 'react-icons/lu';
 
 import AppStoreButton from './AppStoreButton';
 import PlayStoreButton from './PlayStoreButton';
@@ -65,10 +65,14 @@ const Hero: React.FC = () => {
                     {heroDetails.subheading}
                 </motion.p>
 
-                <motion.div className="mt-8 flex justify-center" {...fadeUp(0.3)}>
+                <motion.div className="mt-8 flex flex-wrap justify-center gap-3" {...fadeUp(0.3)}>
                     <Button href={heroDetails.appUrl} size="lg">
-                        Brauzerda sinab ko&apos;rish
+                        Brauzerda sinab köriş
                         <LuArrowRight size={18} aria-hidden />
+                    </Button>
+                    <Button href={heroDetails.translatorUrl} variant="outline" size="lg">
+                        <LuLanguages size={18} aria-hidden />
+                        Yangi alifbo translatori
                     </Button>
                 </motion.div>
 
@@ -104,7 +108,7 @@ const Hero: React.FC = () => {
                         sizes="(max-width: 768px) 100vw, 1000px"
                         priority={true}
                         unoptimized={true}
-                        alt="Imlo Go ilovasining bosh sahifasi: diktantlar ro‘yxati"
+                        alt="Imlo Go ilovasining boş sahifasi: diktantlar röyxati"
                         className="mx-auto w-full"
                     />
 

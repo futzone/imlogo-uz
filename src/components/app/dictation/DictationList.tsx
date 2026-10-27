@@ -22,15 +22,16 @@ import {
     useDictations,
 } from '@/lib/app/dictationStore';
 import { formatDate } from '@/lib/app/format';
-import { loadWorks } from '@/lib/app/storage';
 import { Dictation } from '@/lib/app/types';
 import { AppButton, EmptyState, interactiveCardClass, MetaChip, Spinner } from '../ui';
+import { useHistory } from '../useHistory';
 import BeforeStartSheet from './BeforeStartSheet';
 
 /** Diktantlar ro'yxati (sahifalab yuklanadi). */
 const DictationList: React.FC = () => {
     const state = useDictations();
-    const [doneIds, setDoneIds] = useState<Set<string>>(new Set());
+    const history = useHistory();
+    const doneIds = new Set(history?.works.map(work => work.id) ?? []);
     const [selected, setSelected] = useState<Dictation | null>(null);
     const [sheetOpen, setSheetOpen] = useState(false);
     const sentinelRef = useRef<HTMLDivElement>(null);
@@ -38,7 +39,6 @@ const DictationList: React.FC = () => {
 
     useEffect(() => {
         fetchNextDictations();
-        setDoneIds(new Set(loadWorks().map(work => work.id)));
     }, []);
 
     // Ro'yxat oxiriga yaqinlashganda keyingi sahifa yuklanadi.
@@ -61,7 +61,7 @@ const DictationList: React.FC = () => {
         return (
             <EmptyState icon={<LuCloudOff aria-hidden />} tone="danger" text={`Xatolik yuz berdi: ${state.error}`}>
                 <AppButton variant="outline" icon={<LuRefreshCw size={20} aria-hidden />} onClick={refreshDictations}>
-                    Qayta urinish
+                    Qayta uriniş
                 </AppButton>
             </EmptyState>
         );
@@ -72,10 +72,10 @@ const DictationList: React.FC = () => {
             <div className="mb-2">
                 <Badge pulse>{doneIds.size === 0 ? 'Audio diktantlar' : `Bajarilgan: ${doneIds.size} ta`}</Badge>
                 <h1 className="mt-3 text-[26px] font-bold sm:text-4xl">
-                    Diktantni tanlang va <span className="text-gradient">yozishni boshlang</span>
+                    Diktantni tanlang va <span className="text-gradient">yozişni boşlang</span>
                 </h1>
                 <p className="mt-2 text-[15px] text-muted">
-                    Audio eshitasiz, matnni yozasiz, tizim esa imlo xatolarni avtomatik tekshiradi.
+                    Audio eşitasiz, matnni yozasiz, tizim esa imlo xatolarni avtomatik tekşiradi.
                 </p>
             </div>
 
@@ -100,7 +100,7 @@ const DictationList: React.FC = () => {
                                 icon={<LuRefreshCw size={20} aria-hidden />}
                                 onClick={fetchNextDictations}
                             >
-                                Qayta urinish
+                                Qayta uriniş
                             </AppButton>
                         </div>
                     ) : (
@@ -142,16 +142,16 @@ const DictationCard: React.FC<CardProps> = ({ dictation, done, onSelect }) => {
                     </span>
                     <span className="mt-2.5 flex flex-wrap gap-x-5 gap-y-2">
                         <MetaChip icon={<LuTimer aria-hidden />}>Davomiyligi: {dictation.time} min</MetaChip>
-                        <MetaChip icon={<LuType aria-hidden />}>So‘zlar soni: {dictation.length} ta</MetaChip>
+                        <MetaChip icon={<LuType aria-hidden />}>Sözlar soni: {dictation.length} ta</MetaChip>
                         <MetaChip icon={<LuPersonStanding aria-hidden />}>
-                            Yosh chegarasi: {dictation.ageName} yosh, ({dictation.className})
+                            Yoş çegarasi: {dictation.ageName} yoş, ({dictation.className})
                         </MetaChip>
-                        {created && <MetaChip icon={<LuCalendar aria-hidden />}>Qo‘shilgan vaqti: {created}</MetaChip>}
+                        {created && <MetaChip icon={<LuCalendar aria-hidden />}>Qöşilgan vaqti: {created}</MetaChip>}
                     </span>
                 </span>
-                <CardAction className="mt-3 hidden sm:inline-flex">Boshlash</CardAction>
+                <CardAction className="mt-3 hidden sm:inline-flex">Boşlaş</CardAction>
             </span>
-            <CardAction className="mt-3 flex justify-end sm:hidden">Boshlash</CardAction>
+            <CardAction className="mt-3 flex justify-end sm:hidden">Boşlaş</CardAction>
         </button>
     );
 };

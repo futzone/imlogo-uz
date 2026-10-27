@@ -144,7 +144,7 @@ const TypingDemo: React.FC = () => {
                     Jonli namuna
                 </span>
                 <span className="font-mono text-[11px] uppercase tracking-widest text-muted">
-                    {Math.min(typed.length, words.length)}/{words.length} so‘z
+                    {Math.min(typed.length, words.length)}/{words.length} söz
                 </span>
             </div>
 
@@ -164,7 +164,7 @@ const TypingDemo: React.FC = () => {
                             restart();
                         }
                     }}
-                    aria-label="Tez yozish namunasi: ekrandagi so‘zlarni tering"
+                    aria-label="Tez yoziş namunasi: ekrandagi sözlarni tering"
                     autoCapitalize="none"
                     autoComplete="off"
                     autoCorrect="off"
@@ -184,7 +184,7 @@ const TypingDemo: React.FC = () => {
                 {!focused && !result && (
                     <div className="absolute inset-0 flex items-center justify-center">
                         <span className="rounded-full border border-primary/30 bg-white/90 px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-primary shadow-glow">
-                            Boshlash uchun shu yerga bosing
+                            Boşlaş uçun şu yerga bosing
                         </span>
                     </div>
                 )}
@@ -194,7 +194,7 @@ const TypingDemo: React.FC = () => {
                         <div className="flex items-end gap-8">
                             <div className="text-center">
                                 <div className="font-mono text-5xl font-medium text-gradient">{result.wpm}</div>
-                                <div className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted">so‘z/daqiqa</div>
+                                <div className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted">söz/daqiqa</div>
                             </div>
                             <div className="text-center">
                                 <div className="font-mono text-5xl font-medium text-foreground">{result.accuracy}%</div>
@@ -210,16 +210,16 @@ const TypingDemo: React.FC = () => {
                             className="inline-flex min-h-[44px] items-center gap-2 rounded-full border-2 border-primary/25 px-5 font-body text-sm font-semibold transition-all duration-300 hover:border-primary hover:bg-primary/5"
                         >
                             <LuRotateCcw size={16} aria-hidden />
-                            Qayta urinish
+                            Qayta uriniş
                         </button>
                     </div>
                 )}
             </div>
 
             <div className="border-t border-line px-5 py-3 font-mono text-[11px] text-muted">
-                <kbd className="rounded border border-line bg-white px-1.5 py-0.5">tab</kbd> — qayta boshlash
+                <kbd className="rounded border border-line bg-white px-1.5 py-0.5">tab</kbd> — qayta boşlaş
                 <span className="mx-2 opacity-40">·</span>
-                o‘, g‘ uchun istalgan tutuq belgisi (&apos; ‘ ’ ʻ `) qabul qilinadi
+                o‘, g‘ uçun istalgan tutuq belgisi (&apos; ‘ ’ ʻ `) qabul qilinadi
             </div>
         </div>
     );

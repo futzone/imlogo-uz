@@ -3,90 +3,45 @@
 import { useEffect, useState } from 'react';
 import clsx from 'clsx';
 
-interface TocItem {
-    id: string;
-    text: string;
-    level: number;
-}
+import { Heading } from '@/lib/slug';
 
-export default function DocsTableOfContents({ content }: { content: string }) {
-    const [activeId, setActiveId] = useState<string>('');
-    const [headings, setHeadings] = useState<TocItem[]>([]);
+/** "Shu sahifada": sarlavhalar ro'yxati, o'qilayotgan bo'lim belgilanadi. */
+const DocsTableOfContents: React.FC<{ headings: Heading[] }> = ({ headings }) => {
+    const [activeId, setActiveId] = useState(headings[0]?.id ?? '');
 
-    // Parse headings from markdown content
     useEffect(() => {
-        const lines = content.split('\n');
-        const items: TocItem[] = [];
-        let inCodeBlock = false;
-
-        for (const line of lines) {
-            if (line.trim().startsWith('```')) {
-                inCodeBlock = !inCodeBlock;
-                continue;
-            }
-            if (inCodeBlock) continue;
-
-            const match = line.match(/^(#{2,3})\s+(.+)$/);
-            if (match) {
-                const level = match[1].length;
-                const text = match[2].trim();
-                const id = text
-                    .toLowerCase()
-                    .replace(/[^\w\s-]/g, '')
-                    .replace(/\s+/g, '-')
-                    .replace(/-+/g, '-');
-                items.push({ id, text, level });
-            }
-        }
-        setHeadings(items);
-    }, [content]);
-
-    // IntersectionObserver for active heading
-    useEffect(() => {
-        if (headings.length === 0) return;
+        const elements = headings
+            .map(heading => document.getElementById(heading.id))
+            .filter((el): el is HTMLElement => el !== null);
+        if (elements.length === 0) return;
 
         const observer = new IntersectionObserver(
-            (entries) => {
-                for (const entry of entries) {
-                    if (entry.isIntersecting) {
-                        setActiveId(entry.target.id);
-                        break;
-                    }
-                }
+            entries => {
+                const visible = entries.filter(entry => entry.isIntersecting);
+                if (visible.length > 0) setActiveId(visible[0].target.id);
             },
-            { rootMargin: '-80px 0px -60% 0px', threshold: 0.1 }
+            { rootMargin: '-96px 0px -65% 0px' }
         );
-
-        for (const heading of headings) {
-            const el = document.getElementById(heading.id);
-            if (el) observer.observe(el);
-        }
-
+        elements.forEach(el => observer.observe(el));
         return () => observer.disconnect();
     }, [headings]);
 
     if (headings.length === 0) return null;
 
     return (
-        <nav className="w-full">
-            <h4 className="text-xs font-semibold text-foreground-accent uppercase tracking-wider mb-3">
-                Mundarija
-            </h4>
-            <ul className="space-y-1 border-l border-gray-200">
-                {headings.map((heading) => (
+        <nav aria-label="Şu sahifada">
+            <p className="mb-3 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-muted">Şu sahifada</p>
+            <ul className="border-l border-line">
+                {headings.map(heading => (
                     <li key={heading.id}>
                         <a
                             href={`#${heading.id}`}
-                            onClick={(e) => {
-                                e.preventDefault();
-                                document.getElementById(heading.id)?.scrollIntoView({ behavior: 'smooth' });
-                            }}
                             className={clsx(
-                                'block text-sm py-1 border-l-2 -ml-px transition-colors',
+                                '-ml-px block border-l-2 py-1.5 text-sm leading-snug transition-colors',
                                 heading.level === 2 ? 'pl-3' : 'pl-6',
                                 activeId === heading.id
-                                    ? 'border-primary text-primary font-medium'
-                                    : 'border-transparent text-foreground-accent hover:text-foreground hover:border-gray-300'
+                                    ? 'border-primary font-medium text-primary'
+                                    : 'border-transparent text-muted hover:border-primary/40 hover:text-foreground'
                             )}
                         >
                             {heading.text}
@@ -96,4 +51,6 @@ export default function DocsTableOfContents({ content }: { content: string }) {
             </ul>
         </nav>
     );
-}
+};
+
+export default DocsTableOfContents;

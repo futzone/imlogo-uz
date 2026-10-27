@@ -25,7 +25,7 @@ const TypingResultView: React.FC<Props> = ({ result, previousBest = null, onRest
         <div className="flex w-full flex-col items-center">
             <div className="flex flex-wrap justify-center gap-2">
                 <Badge>{typingConfigLabel(config)}</Badge>
-                {config.punctuation && <Badge>tinish belgilari</Badge>}
+                {config.punctuation && <Badge>tiniş belgilari</Badge>}
                 {config.numbers && <Badge>raqamlar</Badge>}
                 {isRecord && (
                     <Badge pulse tone="success">
@@ -37,7 +37,7 @@ const TypingResultView: React.FC<Props> = ({ result, previousBest = null, onRest
             <div className="mt-5 flex items-end gap-8 text-center sm:gap-16">
                 <div>
                     <p className={`${headlineClass} text-gradient`}>{Math.round(result.wpm)}</p>
-                    <p className={captionClass}>so‘z/daqiqa (WPM)</p>
+                    <p className={captionClass}>söz/daqiqa (WPM)</p>
                 </div>
                 <div>
                     <p className={headlineClass}>{Math.round(result.accuracy)}%</p>
@@ -55,12 +55,12 @@ const TypingResultView: React.FC<Props> = ({ result, previousBest = null, onRest
                 <StatTile
                     label="Belgilar"
                     value={`${result.correctChars}/${result.incorrectChars}/${result.extraChars}/${result.missedChars}`}
-                    hint="to‘g‘ri / xato / ortiqcha / tushib qolgan"
+                    hint="töğri / xato / ortiqça / tuşib qolgan"
                 />
                 <StatTile
                     label="Barqarorlik"
                     value={`${Math.round(result.consistency)}%`}
-                    hint="Tezlik mashq davomida qanchalik bir tekis bo‘lgani"
+                    hint="Tezlik maşq davomida qançalik bir tekis bölgani"
                 />
                 <StatTile label="Vaqt" value={`${Math.round(result.seconds)}s`} />
                 {previousBest !== null && (
@@ -72,7 +72,7 @@ const TypingResultView: React.FC<Props> = ({ result, previousBest = null, onRest
                 <div className="mt-7 flex flex-wrap justify-center gap-3">
                     {onRestart && (
                         <AppButton onClick={onRestart} icon={<LuRefreshCw size={20} aria-hidden />}>
-                            Qayta boshlash
+                            Qayta boşlaş
                         </AppButton>
                     )}
                     {historyHref && (

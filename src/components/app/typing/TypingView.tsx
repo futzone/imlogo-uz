@@ -5,11 +5,15 @@ import { LuPointer, LuRefreshCw } from 'react-icons/lu';
 import clsx from 'clsx';
 
 import Badge from '@/components/ui/Badge';
+import { uploadTypingResult } from '@/lib/app/account';
+import { invalidateHistory } from '@/lib/app/history';
 import { loadTypingConfig, loadTypingResults, saveTypingConfig, saveTypingResult } from '@/lib/app/storage';
 import { defaultTypingConfig, isSameTypingConfig, TypingConfig } from '@/lib/app/typing/config';
+import { composeYangi } from '@/lib/app/typing/compose';
 import { TypingEngine } from '@/lib/app/typing/engine';
 import { TypingResult, typingResultFromEngine } from '@/lib/app/typing/result';
 import { createWordGenerator, loadTypingWords } from '@/lib/app/typing/words';
+import { useAuth } from '../auth/AuthProvider';
 import { IconButton, Spinner } from '../ui';
 import TypingConfigBar from './TypingConfigBar';
 import TypingResultView from './TypingResultView';
@@ -32,6 +36,8 @@ const TypingView: React.FC = () => {
     const startedAtRef = useRef<number | null>(null);
     const configRef = useRef<TypingConfig>(defaultTypingConfig);
     const firstEngineRef = useRef(true);
+    // Yangi alifbo: "s" terilib, "h" kutilayotgan harf o'rni (qarang: composeYangi).
+    const pendingRef = useRef<number | null>(null);
 
     // Dvigatel o'zgaruvchan obyekt — har o'zgarishda ekran qo'lda yangilanadi.
     const [, rerender] = useReducer((count: number) => count + 1, 0);
@@ -42,6 +48,7 @@ const TypingView: React.FC = () => {
     const [result, setResult] = useState<TypingResult | null>(null);
     const [previousBest, setPreviousBest] = useState<number | null>(null);
     const [focused, setFocused] = useState(false);
+    const { account } = useAuth();
 
     const elapsed = () => (startedAtRef.current === null ? 0 : performance.now() - startedAtRef.current);
 
@@ -53,6 +60,7 @@ const TypingView: React.FC = () => {
     const restart = useCallback((words: string[], nextConfig: TypingConfig) => {
         stopTimer();
         startedAtRef.current = null;
+        pendingRef.current = null;
         setResult(null);
         setPreviousBest(null);
         setEngine(new TypingEngine(nextConfig, createWordGenerator(words, nextConfig)));
@@ -62,7 +70,7 @@ const TypingView: React.FC = () => {
         const saved = loadTypingConfig();
         configRef.current = saved;
         setConfig(saved);
-        loadTypingWords()
+        loadTypingWords(saved.alphabet)
             .then(words => {
                 setPool(words);
                 restart(words, saved);
@@ -87,10 +95,23 @@ const TypingView: React.FC = () => {
     };
 
     const changeConfig = (next: TypingConfig) => {
+        const alphabetChanged = next.alphabet !== configRef.current.alphabet;
         configRef.current = next;
         setConfig(next);
         saveTypingConfig(next);
-        if (pool) restart(pool, next);
+        if (!alphabetChanged) {
+            if (pool) restart(pool, next);
+            return;
+        }
+        setEngine(null);
+        loadTypingWords(next.alphabet)
+            .then(words => {
+                // Yuklanish paytida yana boshqa yozuv tanlangan bo'lishi mumkin.
+                if (configRef.current.alphabet !== next.alphabet) return;
+                setPool(words);
+                restart(words, configRef.current);
+            })
+            .catch(() => setLoadFailed(true));
     };
 
     const finish = (finished: TypingEngine) => {
@@ -104,7 +125,18 @@ const TypingView: React.FC = () => {
         rootRef.current?.focus();
 
         // Hech narsa terilmagan mashq tarixga yozilmaydi.
-        if (finishedResult.correctChars + finishedResult.incorrectChars > 0) saveTypingResult(finishedResult);
+        if (finishedResult.correctChars + finishedResult.incorrectChars > 0) {
+            saveTypingResult(finishedResult);
+            // Kirgan foydalanuvchi natijasi serverga ham yoziladi; yozilmasa, qurilmada qoladi
+            // va "Natijalarim" sahifasidan keyinroq yuklanadi.
+            if (account) {
+                uploadTypingResult(account.id, finishedResult)
+                    .catch(() => undefined)
+                    .finally(invalidateHistory);
+            } else {
+                invalidateHistory();
+            }
+        }
     };
 
     const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -114,15 +146,21 @@ const TypingView: React.FC = () => {
         const now = elapsed();
 
         if (!value.startsWith(SENTINEL)) {
+            pendingRef.current = null;
             engine.backToPreviousWord();
         } else {
             const text = value.slice(SENTINEL.length);
             const space = text.search(/\s/);
+            let word = space >= 0 ? text.slice(0, space) : text;
+            if (engine.config.alphabet === 'yangi') {
+                const composed = composeYangi(engine.current, word, engine.target, pendingRef.current, space >= 0);
+                word = composed.value;
+                pendingRef.current = composed.pending;
+            }
+            engine.setCurrent(word, now);
             if (space >= 0) {
-                engine.setCurrent(text.slice(0, space), now);
+                pendingRef.current = null;
                 engine.commitWord(now);
-            } else {
-                engine.setCurrent(text, now);
             }
         }
 
@@ -162,7 +200,7 @@ const TypingView: React.FC = () => {
     if (loadFailed) {
         return (
             <p className="flex flex-1 items-center justify-center p-6 text-center text-[15px] text-muted">
-                So‘zlar to‘plamini yuklab bo‘lmadi
+                Sözlar töplamini yuklab bölmadi
             </p>
         );
     }
@@ -174,7 +212,11 @@ const TypingView: React.FC = () => {
         config.mode === 'time'
             ? `${Math.max(0, config.amount - Math.floor(now / 1000))}`
             : `${engine.typed.length}/${engine.words.length}`;
-    const hint = 'o‘, g‘ uchun istalgan tutuq belgisi qabul qilinadi';
+    const hint = {
+        lotin: 'o‘, g‘ uçun istalgan tutuq belgisi qabul qilinadi',
+        yangi: 'ş, ç, ö, ğ — sh, ch, o‘, g‘ deb ham teriş mumkin',
+        kirill: 'kirill klaviatura tartibini yoqing',
+    }[config.alphabet];
 
     return (
         <div
@@ -200,7 +242,7 @@ const TypingView: React.FC = () => {
                     <div className="text-[20px] sm:text-[24px] xl:text-[28px]">
                         {!engine.started && (
                             <Badge pulse className="mb-3">
-                                O‘zbekcha so‘zlar
+                                {config.alphabet === 'kirill' ? 'Ўзбекча сўзлар' : config.alphabet === 'yangi' ? 'Özbekça sözlar' : 'O‘zbekcha so‘zlar'}
                             </Badge>
                         )}
                         <div className="flex items-end gap-4 font-mono font-medium">
@@ -225,7 +267,7 @@ const TypingView: React.FC = () => {
                             <input
                                 ref={inputRef}
                                 data-typing-input
-                                aria-label="Ekrandagi so‘zlarni tering"
+                                aria-label="Ekrandagi sözlarni tering"
                                 defaultValue={SENTINEL}
                                 onChange={handleInput}
                                 onFocus={() => setFocused(true)}
@@ -243,7 +285,7 @@ const TypingView: React.FC = () => {
                             {!focused && (
                                 <span className="absolute inline-flex items-center gap-2 rounded-full border border-primary/30 bg-white/90 px-[18px] py-2.5 font-mono text-[11px] font-medium uppercase leading-tight tracking-[0.14em] text-primary shadow-glow">
                                     <LuPointer size={16} aria-hidden />
-                                    Boshlash uchun shu yerga bosing
+                                    Boşlaş uçun şu yerga bosing
                                 </span>
                             )}
                         </div>
@@ -251,10 +293,10 @@ const TypingView: React.FC = () => {
                         <div className="mt-5 flex items-center justify-center gap-2 font-mono text-[11px] font-medium text-muted">
                             <IconButton
                                 icon={<LuRefreshCw size={20} aria-hidden />}
-                                tooltip="Qayta boshlash"
+                                tooltip="Qayta boşlaş"
                                 onClick={restartNow}
                             />
-                            <span className="hidden sm:inline">tab — qayta boshlash &nbsp;·&nbsp; {hint}</span>
+                            <span className="hidden sm:inline">tab — qayta boşlaş &nbsp;·&nbsp; {hint}</span>
                         </div>
                         <p className="mt-1 text-center font-mono text-[11px] font-medium text-muted sm:hidden">{hint}</p>
                     </div>

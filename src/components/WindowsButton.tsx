@@ -7,7 +7,7 @@ const WindowsButton = ({ dark }: { dark?: boolean }) => {
     return (
         <StoreButton
             href={ctaDetails.windowsUrl}
-            label="Windows uchun"
+            label="Windows uçun"
             dark={dark}
             icon={
                 <svg viewBox="0 0 512 512" width="24" xmlns="http://www.w3.org/2000/svg" aria-hidden>

@@ -48,13 +48,13 @@ export const saveWork = (work: Work) => {
 // --- Tez yozish ---
 
 // Grafik kesimlari ixcham ko'rinishda saqlanadi: [soniya, wpm, xom, xatolar].
-type StoredSample = [number, number, number, number];
+export type StoredSample = [number, number, number, number];
 type StoredTypingResult = Omit<TypingResult, 'samples'> & { samples: StoredSample[] };
 
 const round1 = (value: number) => Math.round(value * 10) / 10;
 
-const packSample = (s: TypingSample): StoredSample => [s.second, round1(s.wpm), s.raw, s.errors];
-const unpackSample = ([second, wpm, raw, errors]: StoredSample): TypingSample => ({ second, wpm, raw, errors });
+export const packSample = (s: TypingSample): StoredSample => [s.second, round1(s.wpm), s.raw, s.errors];
+export const unpackSample = ([second, wpm, raw, errors]: StoredSample): TypingSample => ({ second, wpm, raw, errors });
 
 /** Saqlangan natijalar, eng yangisi birinchi. */
 export const loadTypingResults = (): TypingResult[] => {

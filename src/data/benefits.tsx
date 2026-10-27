@@ -14,22 +14,22 @@ import { IBenefit } from "@/types"
 
 export const benefits: IBenefit[] = [
     {
-        title: "Diktant yozish qanday ishlaydi?",
-        description: "Audio eshitasiz, matnni yozasiz, tizim esa imlo xatolarni avtomatik tekshiradi. Natijani darhol ko‘rib chiqasiz.",
+        title: "Diktant yoziş qanday işlaydi?",
+        description: "Audio eşitasiz, matnni yozasiz, tizim esa imlo xatolarni avtomatik tekşiradi. Natijani darhol körib çiqasiz.",
         bullets: [
             {
-                title: "Eshitish",
-                description: "Diktant audio faylini tinglang va diqqat bilan esda saqlang — har bir so‘z muhim.",
+                title: "Eşitiş",
+                description: "Diktant audio faylini tinglang va diqqat bilan esda saqlang — har bir söz muhim.",
                 icon: <LuHeadphones size={24} />
             },
             {
-                title: "Yozish",
-                description: "Eshitgan matningizni ilovadagi maxsus maydonga yozing — to‘g‘ri yozuvga e’tibor bering.",
+                title: "Yoziş",
+                description: "Eşitgan matningizni ilovadagi maxsus maydonga yozing — töğri yozuvga e’tibor bering.",
                 icon: <LuPenLine size={24} />
             },
             {
-                title: "Tekshiruv",
-                description: "Tizim siz yozgan matnni avtomatik tahlil qiladi va imlo xatolarni ko‘rsatadi — natijani bir zumda ko‘rasiz.",
+                title: "Tekşiruv",
+                description: "Tizim siz yozgan matnni avtomatik tahlil qiladi va imlo xatolarni körsatadi — natijani bir zumda körasiz.",
                 icon: <LuZap size={24} />
             }
         ],
@@ -38,20 +38,20 @@ export const benefits: IBenefit[] = [
 
     {
         title: "Asosiy imkoniyatlar",
-        description: "O‘zbek tilidagi turli matnlardan tayyorlangan audio diktantlar orqali eshitish va yozish ko‘nikmalaringizni mustahkamlang.",
+        description: "Özbek tilidagi turli matnlardan tayyorlangan audio diktantlar orqali eşitiş va yoziş könikmalaringizni mustahkamlang.",
         bullets: [
             {
-                title: "Imlo xatolarni aniqlash",
-                description: "Yozgan matningiz avtomatik tarzda tekshiriladi va imloviy xatolar aniq ko‘rsatiladi.",
+                title: "Imlo xatolarni aniqlaş",
+                description: "Yozgan matningiz avtomatik tarzda tekşiriladi va imloviy xatolar aniq körsatiladi.",
                 icon: <LuSpellCheck size={24} />
             },
             {
-                title: "Baholash tizimi",
+                title: "Baholaş tizimi",
                 description: "Natijalaringiz ballar orqali baholanadi — aniqlik, tezlik va xato darajasi hisobga olinadi.",
                 icon: <LuAward size={24} />
             },
             {
-                title: "Harakat tarixini ko‘rish",
+                title: "Harakat tarixini köriş",
                 description: "Oldingi diktantlaringizni, xatolar tarixini va yutuqlaringizni kuzatib boring.",
                 icon: <LuHistory size={24} />
             }
@@ -59,22 +59,22 @@ export const benefits: IBenefit[] = [
         imageSrc: "/images/Screenshot 2025-05-03 000456-portrait.webp"
     },
     {
-        title: "Bu kimlar uchun?",
-        description: "«Imlo Go» tizimining foydalanuvchilari: talabalar, o‘quvchilar, o‘qituvchilar va boshqa istalgan odam!",
+        title: "Bu kimlar uçun?",
+        description: "«Imlo Go» tizimining foydalanuvçilari: talabalar, öquvçilar, öqituvçilar va boşqa istalgan odam!",
         bullets: [
             {
-                title: "O‘quvchilar va talabalar",
-                description: "Imlo ko‘nikmalarini mustahkamlash, darslarga tayyorlanish va bilimni mustahkamlash uchun ideal vosita.",
+                title: "Öquvçilar va talabalar",
+                description: "Imlo könikmalarini mustahkamlaş, darslarga tayyorlaniş va bilimni mustahkamlaş uçun ideal vosita.",
                 icon: <LuGraduationCap size={24} />
             },
             {
-                title: "O‘qituvchilar",
-                description: "Dars jarayonida qo‘llash, uy vazifasi sifatida berish va imloviy tahlilni avtomatlashtirish imkoniyati.",
+                title: "Öqituvçilar",
+                description: "Dars jarayonida qöllaş, uy vazifasi sifatida beriş va imloviy tahlilni avtomatlaştiriş imkoniyati.",
                 icon: <LuPresentation size={24} />
             },
             {
-                title: "O‘zini sinamoqchi bo‘lganlar",
-                description: "Imlo bo‘yicha o‘z ustida ishlayotgan, nutq va yozuvni to‘g‘rilashni xohlaydigan har bir inson uchun foydali.",
+                title: "Özini sinamoqçi bölganlar",
+                description: "Imlo böyiça öz ustida işlayotgan, nutq va yozuvni töğrilaşni xohlaydigan har bir inson uçun foydali.",
                 icon: <LuTarget size={24} />
             }
         ],

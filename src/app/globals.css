@@ -151,9 +151,9 @@ h1, h2, h3, h4, h5, h6 {
   background: #fff;
 }
 
-/* Telefonda klaviatura ochiq (tez yozish) paytida pastki navigatsiya joy egallamasin */
+/* Telefonda klaviatura ochiq (tez yozish) paytida yuqori panel joy egallamasin */
 @media (pointer: coarse) {
-  body:has([data-typing-input]:focus) .app-bottom-tabs {
+  body:has([data-typing-input]:focus) .app-topbar {
     display: none;
   }
 }

@@ -1,118 +1,87 @@
-'use client';
-
+import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-function slugify(text: string): string {
-    return text
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-');
-}
+import { Heading } from '@/lib/slug';
 
-function getChildrenText(children: React.ReactNode): string {
-    if (typeof children === 'string') return children;
-    if (Array.isArray(children)) return children.map(getChildrenText).join('');
+const linkClass = 'font-medium text-primary no-underline hover:underline';
+
+const childrenText = (children: React.ReactNode): string => {
+    if (typeof children === 'string' || typeof children === 'number') return String(children);
+    if (Array.isArray(children)) return children.map(childrenText).join('');
     if (children && typeof children === 'object' && 'props' in children) {
-        return getChildrenText((children as React.ReactElement<{ children?: React.ReactNode }>).props.children);
+        return childrenText((children as React.ReactElement<{ children?: React.ReactNode }>).props.children);
     }
-    return String(children ?? '');
-}
+    return '';
+};
 
-export default function DocsContent({ content }: { content: string }) {
+/**
+ * Qo'llanma matni (Markdown) — serverda chiziladi, brauzerga qo'shimcha JS
+ * yuborilmaydi. Sarlavha id'lari mundarija bilan bir xil tartibda `headings`
+ * ro'yxatidan olinadi, shuning uchun havolalar doim mos keladi.
+ */
+const DocsContent: React.FC<{ content: string; headings: Heading[] }> = ({ content, headings }) => {
+    let index = 0;
+    const nextId = () => headings[index++]?.id;
+
     return (
-        <article className="prose prose-lg max-w-none prose-headings:font-bold prose-headings:text-foreground prose-h1:text-3xl md:prose-h1:text-4xl prose-h2:text-2xl prose-h2:border-b prose-h2:border-gray-200 prose-h2:pb-2 prose-h2:mt-10 prose-h3:text-xl prose-p:text-foreground-accent prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-li:text-foreground-accent prose-strong:text-foreground prose-img:rounded-lg prose-img:shadow-md">
+        <div className="prose max-w-none text-[16px] leading-[1.75] text-foreground prose-headings:scroll-mt-28 prose-headings:font-heading prose-headings:text-foreground prose-h2:mt-12 prose-h2:border-b prose-h2:border-line prose-h2:pb-2 prose-h2:text-2xl prose-h3:mt-8 prose-h3:text-lg prose-p:text-foreground/85 prose-a:font-medium prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground/85 prose-li:marker:text-primary/60">
             <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                    h2({ children }) {
-                        const id = slugify(getChildrenText(children));
-                        return <h2 id={id}>{children}</h2>;
-                    },
-                    h3({ children }) {
-                        const id = slugify(getChildrenText(children));
-                        return <h3 id={id}>{children}</h3>;
-                    },
-                    table({ children }) {
-                        return (
-                            <div className="overflow-x-auto my-6">
-                                <table className="min-w-full border border-gray-200 rounded-lg overflow-hidden text-sm">
-                                    {children}
-                                </table>
-                            </div>
-                        );
-                    },
-                    thead({ children }) {
-                        return <thead className="bg-gray-50">{children}</thead>;
-                    },
-                    th({ children }) {
-                        return (
-                            <th className="px-4 py-3 text-left font-semibold text-foreground border-b border-gray-200">
+                    h2: ({ children }) => <h2 id={nextId()}>{children}</h2>,
+                    h3: ({ children }) => <h3 id={nextId()}>{children}</h3>,
+                    // Jadval kabi `not-prose` bloklar ichida ham havola ekani ko'rinib tursin.
+                    a: ({ href = '', children }) =>
+                        href.startsWith('/') || href.startsWith('#') ? (
+                            <Link href={href} className={linkClass}>
                                 {children}
-                            </th>
-                        );
-                    },
-                    td({ children }) {
-                        return (
-                            <td className="px-4 py-3 text-foreground-accent border-b border-gray-100">
+                            </Link>
+                        ) : (
+                            <a href={href} target="_blank" rel="noopener noreferrer" className={linkClass}>
                                 {children}
-                            </td>
-                        );
-                    },
-                    tr({ children }) {
-                        return <tr className="hover:bg-gray-50 transition-colors">{children}</tr>;
-                    },
-                    code({ className, children, ...props }) {
-                        const match = /language-(\w+)/.exec(className || '');
-                        const lang = match ? match[1] : undefined;
-                        const codeString = String(children).replace(/\n$/, '');
-                        const isBlock = codeString.includes('\n');
-
-                        if (lang || isBlock) {
-                            return (
-                                <SyntaxHighlighter
-                                    style={oneDark}
-                                    language={lang || 'text'}
-                                    PreTag="div"
-                                    customStyle={{
-                                        borderRadius: '0.75rem',
-                                        fontSize: '0.875rem',
-                                        lineHeight: '1.6',
-                                        margin: 0,
-                                    }}
-                                >
-                                    {codeString}
-                                </SyntaxHighlighter>
-                            );
-                        }
-
-                        // Inline code
-                        return (
-                            <code
-                                className="bg-purple-50 text-purple-800 px-1.5 py-0.5 rounded text-sm font-mono border border-purple-100"
-                                {...props}
-                            >
+                            </a>
+                        ),
+                    table: ({ children }) => (
+                        <div className="not-prose my-6 overflow-x-auto rounded-xl border border-line">
+                            <table className="w-full border-collapse text-left text-[15px]">{children}</table>
+                        </div>
+                    ),
+                    thead: ({ children }) => <thead className="bg-surface">{children}</thead>,
+                    th: ({ children, style }) => (
+                        <th style={style} className="border-b border-line px-4 py-3 font-heading text-sm font-semibold">
+                            {children}
+                        </th>
+                    ),
+                    td: ({ children, style }) => (
+                        <td style={style} className="border-b border-line/60 px-4 py-3 align-top text-foreground/85">
+                            {children}
+                        </td>
+                    ),
+                    blockquote: ({ children }) => (
+                        <blockquote className="not-prose my-6 rounded-r-xl border-l-4 border-primary/50 bg-primary/5 px-5 py-3 text-[15px] leading-relaxed [&_p]:my-1">
+                            {children}
+                        </blockquote>
+                    ),
+                    pre: ({ children }) => (
+                        <pre className="not-prose my-6 overflow-x-auto rounded-xl bg-[#14101f] p-4 font-mono text-[13px] leading-relaxed text-white/90">
+                            {children}
+                        </pre>
+                    ),
+                    code: ({ className, children }) =>
+                        className || childrenText(children).includes('\n') ? (
+                            <code className={className}>{children}</code>
+                        ) : (
+                            <code className="rounded-md border border-primary/15 bg-primary/5 px-1.5 py-0.5 font-mono text-[0.88em] font-normal text-primary-accent before:content-none after:content-none">
                                 {children}
                             </code>
-                        );
-                    },
-                    pre({ children }) {
-                        return <>{children}</>;
-                    },
-                    blockquote({ children }) {
-                        return (
-                            <blockquote className="border-l-4 border-primary/40 bg-purple-50/50 pl-4 py-2 my-4 rounded-r-lg not-italic">
-                                {children}
-                            </blockquote>
-                        );
-                    },
+                        ),
                 }}
             >
                 {content}
             </ReactMarkdown>
-        </article>
+        </div>
     );
-}
+};
+
+export default DocsContent;

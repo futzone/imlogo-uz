@@ -1,25 +1,20 @@
+import DocsMobileNav from '@/components/docs/DocsMobileNav';
 import DocsSidebar from '@/components/docs/DocsSidebar';
 
+/** Qo'llanma: chapda bo'limlar, o'rtada matn, o'ngda (keng ekranda) mundarija. */
 export default function QollanmaLayout({ children }: { children: React.ReactNode }) {
     return (
-        <div className="pt-24 md:pt-32 pb-16 px-5">
-            <div className="max-w-7xl mx-auto flex gap-8">
-                {/* Sidebar - desktop */}
-                <aside className="hidden lg:block w-56 shrink-0">
-                    <div className="sticky top-32">
+        <div className="px-5 pb-20 pt-28 md:pt-32">
+            <div className="mx-auto flex max-w-7xl gap-10 xl:gap-14">
+                <aside className="hidden w-60 shrink-0 lg:block">
+                    <div className="sticky top-28 max-h-[calc(100dvh-8rem)] overflow-y-auto pb-6">
                         <DocsSidebar />
                     </div>
                 </aside>
-
-                {/* Mobile sidebar */}
-                <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 px-4 py-2">
-                    <div className="flex gap-2 overflow-x-auto">
-                        <DocsSidebar />
-                    </div>
+                <div className="min-w-0 flex-1">
+                    <DocsMobileNav />
+                    {children}
                 </div>
-
-                {/* Main content area */}
-                {children}
             </div>
         </div>
     );

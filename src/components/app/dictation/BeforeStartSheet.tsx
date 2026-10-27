@@ -9,14 +9,14 @@ import { Sheet } from '../Overlay';
 import { AppButton } from '../ui';
 
 const rules = [
-    '✅ Diktant boshlangandan so‘ng sahifani tark etishga ruxsat yo‘q. Agar chiqib ketsangiz, diktant bekor qilinadi.',
-    '⏰ Diktant uchun belgilangan vaqt mavjud. Vaqt tugashi bilan audio avtomatik to‘xtaydi va topshirish imkoniyati yopiladi.',
-    '🎧 Diktant faqat bir marta eshitiladi. Qayta eshitish imkoniyati berilmaydi.',
-    '🖊 Matnni tinglab darhol yozishingiz kerak. Xotiradan yozishga harakat qiling.',
-    '🛑 Yozish davomida internet uzilib qolsa, diktant natijalari saqlanmaydi.',
-    '📵 Telefon yoki kompyuterning ovozini o‘chirib qo‘ymang. Tinglash uchun qurilmaning ovozi yetarli darajada baland bo‘lishi kerak.',
-    '🔒 Firibgarlik (masalan, boshqa sahifani ochish, boshqa yordam so‘rash) aniqlansa, diktant avtomatik tarzda tugatiladi.',
-    '📝 Diktant yakunlangach, natijani ko‘rish va xatolarni tahlil qilish imkoniyati mavjud.',
+    '✅ Diktant boşlangandan söng sahifani tark etişga ruxsat yöq. Agar çiqib ketsangiz, diktant bekor qilinadi.',
+    '⏰ Diktant uçun belgilangan vaqt mavjud. Vaqt tugaşi bilan audio avtomatik töxtaydi va topşiriş imkoniyati yopiladi.',
+    '🎧 Diktant faqat bir marta eşitiladi. Qayta eşitiş imkoniyati berilmaydi.',
+    '🖊 Matnni tinglab darhol yozişingiz kerak. Xotiradan yozişga harakat qiling.',
+    '🛑 Yoziş davomida internet uzilib qolsa, diktant natijalari saqlanmaydi.',
+    '📵 Telefon yoki kompyuterning ovozini öçirib qöymang. Tinglaş uçun qurilmaning ovozi yetarli darajada baland bölişi kerak.',
+    '🔒 Firibgarlik (masalan, boşqa sahifani oçiş, boşqa yordam söraş) aniqlansa, diktant avtomatik tarzda tugatiladi.',
+    '📝 Diktant yakunlangaç, natijani köriş va xatolarni tahlil qiliş imkoniyati mavjud.',
 ];
 
 interface Props {
@@ -44,8 +44,8 @@ const BeforeStartSheet: React.FC<Props> = ({ dictation, open, onClose }) => {
         <Sheet
             open={open}
             onClose={onClose}
-            title="Diktantni boshlash"
-            subtitle="Boshlashdan avval quyidagi qoidalar bilan tanishib chiqing 👇"
+            title="Diktantni boşlaş"
+            subtitle="Boşlaşdan avval quyidagi qoidalar bilan tanişib çiqing 👇"
         >
             <ol className="space-y-2.5">
                 {rules.map((rule, i) => (
@@ -59,12 +59,12 @@ const BeforeStartSheet: React.FC<Props> = ({ dictation, open, onClose }) => {
             </ol>
             {audioMissing && (
                 <p role="alert" className="mt-4 rounded-xl border border-danger/30 bg-danger/5 px-4 py-3 text-center text-sm text-danger">
-                    Audio tayyorlanish jarayonida. Iltimos, hozircha boshqa diktantni sinab ko‘ring!
+                    Audio tayyorlaniş jarayonida. Iltimos, hozirça boşqa diktantni sinab köring!
                 </p>
             )}
             <div className="mt-5 flex justify-center">
                 <AppButton onClick={start} trailingIcon={<LuArrowRight size={18} aria-hidden />}>
-                    Diktantni boshlash
+                    Diktantni boşlaş
                 </AppButton>
             </div>
         </Sheet>

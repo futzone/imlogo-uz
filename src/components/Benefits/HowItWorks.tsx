@@ -10,15 +10,15 @@ const HowItWorks: React.FC<{ benefit: IBenefit }> = ({ benefit }) => {
         <section id="features" className="relative overflow-hidden bg-background py-20 md:py-24">
             <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 lg:grid-cols-2 lg:gap-20">
                 <Reveal className="order-2 lg:order-1">
-                    <PhoneShot src={benefit.imageSrc} alt="Imlo Go mobil ilovasi: diktantlar ro‘yxati" />
+                    <PhoneShot src={benefit.imageSrc} alt="Imlo Go mobil ilovasi: diktantlar röyxati" />
                 </Reveal>
 
                 <div className="order-1 lg:order-2">
                     <Reveal>
                         <SectionHeading
                             eyebrow="3 qadam"
-                            title="Diktant yozish"
-                            accent="qanday ishlaydi?"
+                            title="Diktant yoziş"
+                            accent="qanday işlaydi?"
                             description={benefit.description}
                             align="left"
                         />

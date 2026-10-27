@@ -1,7 +1,7 @@
 import { siteDetails } from '@/data/siteDetails';
 import { AppInfo, Dictation } from './types';
 
-const BASE_URL = 'https://admin.imlogo.uz';
+export const BASE_URL = 'https://admin.imlogo.uz';
 const PER_PAGE = 20;
 
 interface DictationRecord {

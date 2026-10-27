@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react';
 import { LuHome, LuInbox } from 'react-icons/lu';
 
 import Badge from '@/components/ui/Badge';
+import { fetchMyWork } from '@/lib/app/account';
 import { rateColor } from '@/lib/app/format';
 import { loadWork } from '@/lib/app/storage';
 import { DetectedError, errorTypeNames, Work } from '@/lib/app/types';
+import { useAuth } from '../auth/AuthProvider';
 import PageScaffold from '../PageScaffold';
 import { AppButton, cardClass, CornerAccents, EmptyState, Spinner, StatTile } from '../ui';
 
@@ -20,8 +22,25 @@ interface Props {
 const DictationResult: React.FC<Props> = ({ id, fromHistory }) => {
     // `undefined` — hali o'qilmagan, `null` — topilmadi.
     const [work, setWork] = useState<Work | null | undefined>(undefined);
+    const { account, ready } = useAuth();
+    const userId = account?.id ?? null;
 
-    useEffect(() => setWork(loadWork(id)), [id]);
+    // Avval qurilmadan, topilmasa — hisobdan (boshqa qurilmada topshirilgan bo'lishi mumkin).
+    useEffect(() => {
+        if (!ready) return;
+        const local = loadWork(id);
+        if (local || !userId) {
+            setWork(local);
+            return;
+        }
+        let cancelled = false;
+        fetchMyWork(userId, id)
+            .catch(() => null)
+            .then(remote => !cancelled && setWork(remote));
+        return () => {
+            cancelled = true;
+        };
+    }, [id, userId, ready]);
 
     const tileClass = 'w-auto sm:w-[190px]';
 
@@ -30,9 +49,9 @@ const DictationResult: React.FC<Props> = ({ id, fromHistory }) => {
             {work === undefined ? (
                 <Spinner className="flex-1" />
             ) : work === null ? (
-                <EmptyState icon={<LuInbox aria-hidden />} text="Bu diktant bo‘yicha natija topilmadi">
+                <EmptyState icon={<LuInbox aria-hidden />} text="Bu diktant böyiça natija topilmadi">
                     <AppButton variant="outline" href="/app">
-                        Bosh sahifaga
+                        Boş sahifaga
                     </AppButton>
                 </EmptyState>
             ) : (
@@ -81,7 +100,7 @@ const DictationResult: React.FC<Props> = ({ id, fromHistory }) => {
 
                     <div className="mt-6 flex justify-center">
                         <AppButton href="/app" icon={<LuHome size={20} aria-hidden />}>
-                            Bosh sahifaga
+                            Boş sahifaga
                         </AppButton>
                     </div>
                 </>

@@ -7,7 +7,7 @@ const PlayStoreButton = ({ dark }: { dark?: boolean }) => {
     return (
         <StoreButton
             href={ctaDetails.googlePlayUrl}
-            label="Android uchun"
+            label="Android uçun"
             dark={dark}
             icon={
                 <svg viewBox="30 336.7 120.9 129.2" width="26" aria-hidden>

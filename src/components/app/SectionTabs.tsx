@@ -5,7 +5,7 @@ import { LuHeadphones, LuKeyboard } from 'react-icons/lu';
 /** Ilova bo'limlari: 0 — diktant, 1 — tez yozish. */
 export const appSections = [
     { label: 'Diktant', href: '/app', icon: <LuHeadphones size={18} aria-hidden /> },
-    { label: 'Tez yozish', href: '/app/tez-yozish', icon: <LuKeyboard size={18} aria-hidden /> },
+    { label: 'Tez yoziş', href: '/app/tez-yozish', icon: <LuKeyboard size={18} aria-hidden /> },
 ];
 
 interface Props {

@@ -54,6 +54,10 @@ const config: Config = {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0' },
         },
+        marquee: {
+          from: { transform: 'translateX(0)' },
+          to: { transform: 'translateX(-50%)' },
+        },
       },
       animation: {
         float: 'float 8s ease-in-out infinite',
@@ -61,6 +65,7 @@ const config: Config = {
         'spin-slow': 'spin 10s linear infinite',
         'spin-slower': 'spin 15s linear infinite reverse',
         'caret-blink': 'caret-blink 1s step-end infinite',
+        marquee: 'marquee 60s linear infinite',
       },
     },
   },

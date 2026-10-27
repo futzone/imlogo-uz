@@ -254,7 +254,7 @@ export class DiktantEvaluator {
     private addMissingPunctuation(originalTokens: string[], code: string) {
         for (const token of originalTokens) {
             if (isPunctuation(token)) {
-                this.addError('PUNKTUATSION', 'Tinish belgisi tushib qolgan', token, '', code);
+                this.addError('PUNKTUATSION', 'Tiniş belgisi tuşib qolgan', token, '', code);
             }
         }
     }
@@ -272,9 +272,9 @@ export class DiktantEvaluator {
         if (originalTokens.length === 0) {
             for (const token of userTokens) {
                 if (isPunctuation(token)) {
-                    this.addError('PUNKTUATSION', 'Ortiqcha tinish belgisi', '', token, 'punkt_ortiqcha_umumiy');
+                    this.addError('PUNKTUATSION', 'Ortiqça tiniş belgisi', '', token, 'punkt_ortiqcha_umumiy');
                 } else {
-                    this.addError('IMLO', 'Ortiqcha so‘z', '', token, 'imlo_ortiqcha_soz_umumiy');
+                    this.addError('IMLO', 'Ortiqça söz', '', token, 'imlo_ortiqcha_soz_umumiy');
                 }
             }
             return;
@@ -284,7 +284,7 @@ export class DiktantEvaluator {
         if (userTokens.length === 0) {
             this.addError(
                 'IMLO',
-                'Barcha so‘zlar tushib qolgan',
+                'Barça sözlar tuşib qolgan',
                 this.originalText,
                 '',
                 'imlo_barcha_soz_tushibqolgan'
@@ -344,7 +344,7 @@ export class DiktantEvaluator {
             const significant = deletedWords.length >= SIGNIFICANT_MISSING_WORDS;
             this.addError(
                 'IMLO',
-                significant ? 'Matnning katta qismi yozilmagan' : 'So‘z(lar) tushib qolgan',
+                significant ? 'Matnning katta qismi yozilmagan' : 'Söz(lar) tuşib qolgan',
                 deletedWords.join(' '),
                 '',
                 significant ? 'imlo_katta_hajm_tushibqolgan' : 'imlo_tushibqolgan_guruh'
@@ -354,7 +354,7 @@ export class DiktantEvaluator {
 
         const flushInserted = () => {
             if (insertedWords.length === 0) return;
-            this.addError('IMLO', 'Ortiqcha so‘z(lar)', '', insertedWords.join(' '), 'imlo_ortiqcha_guruh');
+            this.addError('IMLO', 'Ortiqça söz(lar)', '', insertedWords.join(' '), 'imlo_ortiqcha_guruh');
             insertedWords = [];
         };
 
@@ -378,7 +378,7 @@ export class DiktantEvaluator {
                 if (combined.map(normalizeLower).join('') === userNorm) {
                     this.addError(
                         'IMLO',
-                        'So‘zlar qo‘shib yozilgan',
+                        'Sözlar qöşib yozilgan',
                         combined.join(' '),
                         userToken,
                         'imlo_sozlar_qoshib_yozilgan'
@@ -390,7 +390,7 @@ export class DiktantEvaluator {
                 if (deletedWords.length >= 2 && deletedWords.map(normalizeLower).join('') === userNorm) {
                     this.addError(
                         'IMLO',
-                        'So‘zlar qo‘shib yozilgan',
+                        'Sözlar qöşib yozilgan',
                         deletedWords.join(' '),
                         userToken,
                         'imlo_sozlar_qoshib_yozilgan'
@@ -405,7 +405,7 @@ export class DiktantEvaluator {
                 if (combined.map(normalizeLower).join('') === normalizeLower(origToken)) {
                     this.addError(
                         'IMLO',
-                        'So‘z ajratib yozilgan',
+                        'Söz ajratib yozilgan',
                         origToken,
                         combined.join(' '),
                         'imlo_soz_ajratib_yozilgan'
@@ -443,7 +443,7 @@ export class DiktantEvaluator {
                     if (isPunctuation(orig)) {
                         this.addError(
                             'PUNKTUATSION',
-                            'Tinish belgisi tushib qolgan',
+                            'Tiniş belgisi tuşib qolgan',
                             orig,
                             '',
                             'punkt_tushibqolgan_umumiy'
@@ -456,7 +456,7 @@ export class DiktantEvaluator {
                 case 'insertion':
                     if (user === undefined) continue;
                     if (isPunctuation(user)) {
-                        this.addError('PUNKTUATSION', 'Ortiqcha tinish belgisi', '', user, 'punkt_ortiqcha_umumiy');
+                        this.addError('PUNKTUATSION', 'Ortiqça tiniş belgisi', '', user, 'punkt_ortiqcha_umumiy');
                     } else {
                         insertedWords.push(user);
                     }
@@ -491,7 +491,7 @@ export class DiktantEvaluator {
             ) {
                 this.addError(
                     'GRAFIK',
-                    `${marked} harfidagi belgi tushib qolgan`,
+                    `${marked} harfidagi belgi tuşib qolgan`,
                     origToken,
                     userToken,
                     `grafik_${letter.toLowerCase()}_belgi_tushgan`
@@ -507,7 +507,7 @@ export class DiktantEvaluator {
         if (orig === user || isPunctuation(orig)) return;
 
         if (orig.toLowerCase() === user.toLowerCase()) {
-            this.addError('IMLO', 'Bosh harf imlosida xato', orig, user, 'imlo_bosh_harf_umumiy');
+            this.addError('IMLO', 'Boş harf imlosida xato', orig, user, 'imlo_bosh_harf_umumiy');
         }
 
         this.checkGraphicError(orig, user);
@@ -548,13 +548,13 @@ export class DiktantEvaluator {
         const userHasApostrophe = userBase.includes('‘');
 
         if (origHasApostrophe && !userHasApostrophe) {
-            this.addError('IMLO', 'Tutuq belgisi tushib qolgan', origToken, userToken, 'imlo_tutuq_tushibqolgan');
+            this.addError('IMLO', 'Tutuq belgisi tuşib qolgan', origToken, userToken, 'imlo_tutuq_tushibqolgan');
             return true;
         }
         if (!origHasApostrophe && userHasApostrophe) {
             this.addError(
                 'IMLO',
-                'O‘rinsiz tutuq belgisi ishlatilgan',
+                'Örinsiz tutuq belgisi işlatilgan',
                 origToken,
                 userToken,
                 'imlo_tutuq_orinsiz'
@@ -572,7 +572,7 @@ export class DiktantEvaluator {
             if (orig !== user) {
                 this.addError(
                     'PUNKTUATSION',
-                    'Tinish belgisi noto‘g‘ri qo‘llanilgan',
+                    'Tiniş belgisi notöğri qöllanilgan',
                     orig,
                     user,
                     'punkt_belgi_almashgan_umumiy'
@@ -585,8 +585,8 @@ export class DiktantEvaluator {
             this.addError(
                 'IMLO',
                 origIsPunct
-                    ? 'Tinish belgisi o‘rniga so‘z yozilgan'
-                    : 'So‘z o‘rniga tinish belgisi yozilgan',
+                    ? 'Tiniş belgisi örniga söz yozilgan'
+                    : 'Söz örniga tiniş belgisi yozilgan',
                 orig,
                 user,
                 'imlo_soz_va_punkt_almashuvi_umumiy'
@@ -603,7 +603,7 @@ export class DiktantEvaluator {
         // 2. Bosh harf xatosi
         if (normOrigLower === normUserLower) {
             if (orig !== user) {
-                this.addError('IMLO', 'Bosh harf imlosida xato', orig, user, 'imlo_bosh_harf_umumiy');
+                this.addError('IMLO', 'Boş harf imlosida xato', orig, user, 'imlo_bosh_harf_umumiy');
             }
             return;
         }
@@ -623,7 +623,7 @@ export class DiktantEvaluator {
         // 6. Umumiy imlo xatosi
         this.addError(
             'IMLO',
-            'So‘zni noto‘g‘ri yozish',
+            'Sözni notöğri yoziş',
             orig,
             user,
             `imlo_soz_almashtirish_${normOrigLower}_vs_${normUserLower}`

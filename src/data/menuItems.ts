@@ -1,20 +1,9 @@
 import { IMenuItem } from "@/types";
 
 export const menuItems: IMenuItem[] = [
-    {
-        text: "Qo'llanma",
-        url: "/qollanma"
-    },
-    {
-        text: "Dastur haqida",
-        url: "/#features"
-    },
-    {
-        text: "Tez yozish",
-        url: "/#tez-yozish"
-    },
-    {
-        text: "Fikrlar",
-        url: "/#testimonials"
-    }
+    { text: "Imkoniyatlar", url: "/#yangi-imkoniyatlar" },
+    { text: "Yangi alifbo", url: "/#yangi-alifbo" },
+    { text: "Tez yoziş", url: "/#tez-yozish" },
+    { text: "Qöllanma", url: "/qollanma" },
+    { text: "Savollar", url: "/#savollar" },
 ];

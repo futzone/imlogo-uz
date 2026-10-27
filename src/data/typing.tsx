@@ -10,25 +10,25 @@ export const typingDetails: {
     bullets: IBenefitBullet[];
     appUrl: string;
 } = {
-    eyebrow: "Yangi modul",
-    title: "Tez yozishni",
-    accent: "o‘zbekcha so‘zlarda mashq qiling",
+    eyebrow: "Tez yoziş",
+    title: "Tez yozişni",
+    accent: "özbekça sözlarda maşq qiling",
     description:
-        "Ekranga chiqqan o‘zbekcha so‘zlarni iloji boricha tez va xatosiz tering. Har bir harf yozish jarayonida tekshiriladi, mashq oxirida esa tezligingiz va aniqligingiz ko‘rsatiladi.",
+        "Ekranga çiqqan özbekça sözlarni iloji boriça tez va xatosiz tering — eski lotin, yangi alifbo yoki kirillda. Har bir harf yoziş jarayonida tekşiriladi, maşq oxirida esa tezligingiz va aniqligingiz körsatiladi.",
     bullets: [
         {
-            title: "Vaqt yoki so‘zlar soni bo‘yicha",
-            description: "15, 30, 60 yoki 120 soniyalik mashqni yoxud 10, 25, 50, 100 ta so‘zdan iborat to‘plamni tanlang.",
+            title: "Vaqt yoki sözlar soni böyiça",
+            description: "15, 30, 60 yoki 120 soniyalik maşqni yoxud 10, 25, 50, 100 ta sözdan iborat töplamni tanlang.",
             icon: <LuKeyboard size={24} />,
         },
         {
             title: "Tezlik va aniqlik",
-            description: "Daqiqasiga nechta so‘z (WPM) terganingiz, aniqlik foizi hamda to‘g‘ri va xato belgilar soni hisoblanadi.",
+            description: "Daqiqasiga neçta söz (WPM) terganingiz, aniqlik foizi hamda töğri va xato belgilar soni hisoblanadi.",
             icon: <LuGauge size={24} />,
         },
         {
-            title: "O‘sishni kuzatish",
-            description: "Har bir mashq natijasi saqlanadi — eng yaxshi ko‘rsatkichingizni va tezligingiz grafigini kuzatib boring.",
+            title: "Reyting va ösiş",
+            description: "Natijalaringiz saqlanadi, profilda tezlik ösişi grafigi körinadi, hamjamiyat reytingida esa boşqalar bilan bellaşasiz.",
             icon: <LuLineChart size={24} />,
         },
     ],

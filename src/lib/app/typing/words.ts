@@ -1,3 +1,5 @@
+import { Alphabet, transliterate } from '@/lib/translit/core';
+import { loadLexicon } from '@/lib/translit/lexicon';
 import { TypingConfig } from './config';
 import { normalizeTypingText } from './text';
 
@@ -17,11 +19,10 @@ export const parseWordList = (raw: string): string[] => {
 
 let wordsPromise: Promise<string[]> | null = null;
 
-/** Mashq uchun so'zlar to'plami (bir marta yuklanadi). */
-export const loadTypingWords = (): Promise<string[]> => {
+const loadLatinWords = (): Promise<string[]> => {
     wordsPromise ??= fetch('/words/uz.txt')
         .then(response => {
-            if (!response.ok) throw new Error(`So'zlar yuklanmadi (${response.status})`);
+            if (!response.ok) throw new Error(`Sözlar yuklanmadi (${response.status})`);
             return response.text();
         })
         .then(parseWordList)
@@ -30,6 +31,27 @@ export const loadTypingWords = (): Promise<string[]> => {
             throw error;
         });
     return wordsPromise;
+};
+
+const converted = new Map<Alphabet, Promise<string[]>>();
+
+/**
+ * Mashq uchun so'zlar to'plami (har bir yozuv uchun bir marta tayyorlanadi).
+ * To'plam lotincha saqlanadi, yangi alifbo va kirillga lug'at yordamida o'giriladi.
+ */
+export const loadTypingWords = (alphabet: Alphabet = 'lotin'): Promise<string[]> => {
+    if (alphabet === 'lotin') return loadLatinWords();
+    let promise = converted.get(alphabet);
+    if (!promise) {
+        promise = Promise.all([loadLatinWords(), loadLexicon()])
+            .then(([words, lexicon]) => words.map(word => transliterate(word, 'lotin', alphabet, lexicon)))
+            .catch(error => {
+                converted.delete(alphabet);
+                throw error;
+            });
+        converted.set(alphabet, promise);
+    }
+    return promise;
 };
 
 const randomInt = (max: number) => Math.floor(Math.random() * max);

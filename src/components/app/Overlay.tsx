@@ -32,7 +32,7 @@ export const Sheet: React.FC<React.PropsWithChildren<SheetProps>> = ({ open, onC
                 <div className="mt-5">{children}</div>
                 <div className="mt-2 flex justify-center">
                     <AppButton variant="ghost" onClick={onClose}>
-                        Yopish
+                        Yopiş
                     </AppButton>
                 </div>
             </DialogPanel>

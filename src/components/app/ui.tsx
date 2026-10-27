@@ -61,6 +61,13 @@ export const AppButton: React.FC<React.PropsWithChildren<AppButtonProps>> = ({
             </a>
         );
     }
+    if (href.startsWith('mailto:')) {
+        return (
+            <a href={href} onClick={onClick} className={classes}>
+                {content}
+            </a>
+        );
+    }
     return (
         <Link href={href} onClick={onClick} className={classes}>
             {content}

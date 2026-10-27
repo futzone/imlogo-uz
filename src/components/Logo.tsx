@@ -18,7 +18,7 @@ const Logo: React.FC<Props> = ({ className, onDark }) => {
             viewBox="0 0 415 78"
             role="img"
             aria-label="Imlo Go"
-            className={clsx('h-7 w-auto', className)}
+            className={clsx('h-[22px] w-auto', className)}
         >
             <text
                 x="0"

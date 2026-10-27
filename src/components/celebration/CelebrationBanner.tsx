@@ -64,7 +64,7 @@ const CelebrationBanner: React.FC<Props> = ({ className, showCta = true }) => {
                 type="button"
                 onClick={dismiss}
                 className="absolute right-2 top-3.5 flex h-10 w-10 items-center justify-center rounded-full text-muted transition-colors hover:bg-primary/10 hover:text-primary"
-                aria-label="Tabrikni yopish"
+                aria-label="Tabrikni yopiş"
             >
                 <LuX size={18} aria-hidden />
             </button>

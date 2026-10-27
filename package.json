@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "translit:build": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-translit-lexicon.ts",
+    "translit:test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-translit.ts",
+    "pb:evaluator": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-pb-evaluator.ts"
   },
   "dependencies": {
     "@headlessui/react": "^2.1.8",
@@ -15,11 +18,11 @@
     "clsx": "^2.1.1",
     "framer-motion": "^11.11.9",
     "next": "^14.2.13",
+    "pocketbase": "^0.26.9",
     "react": "^18",
     "react-dom": "^18",
     "react-icons": "^5.3.0",
     "react-markdown": "^10.1.0",
-    "react-syntax-highlighter": "^16.1.0",
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",
     "remark-html": "^16.0.1"
@@ -28,7 +31,6 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "@types/react-syntax-highlighter": "^15.5.13",
     "eslint": "^8",
     "eslint-config-next": "14.2.13",
     "postcss": "^8",

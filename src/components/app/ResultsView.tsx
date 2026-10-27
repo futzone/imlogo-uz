@@ -1,38 +1,79 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { LuArrowRight, LuCalendar, LuInbox, LuPersonStanding, LuSlidersHorizontal, LuTarget, LuTimer, LuType } from 'react-icons/lu';
+import { useState } from 'react';
+import {
+    LuArrowRight,
+    LuCalendar,
+    LuInbox,
+    LuPersonStanding,
+    LuSlidersHorizontal,
+    LuTarget,
+    LuTimer,
+    LuType,
+    LuUploadCloud,
+} from 'react-icons/lu';
 import clsx from 'clsx';
 
 import { formatDate, formatTime, rateColor } from '@/lib/app/format';
-import { loadTypingResults, loadWorks } from '@/lib/app/storage';
-import { typingConfigLabel } from '@/lib/app/typing/config';
+import { syncHistory } from '@/lib/app/history';
+import { typingAlphabetLabel, typingConfigLabel } from '@/lib/app/typing/config';
 import { TypingResult } from '@/lib/app/typing/result';
 import { Work } from '@/lib/app/types';
+import { useAuth } from './auth/AuthProvider';
+import DashboardPage from './DashboardPage';
 import { CardAction } from './dictation/DictationList';
 import { Modal } from './Overlay';
-import PageScaffold from './PageScaffold';
 import SectionTabs from './SectionTabs';
 import TypingResultView from './typing/TypingResultView';
+import { useHistory } from './useHistory';
 import { AppButton, EmptyState, interactiveCardClass, MetaChip, Spinner, StatTile } from './ui';
 
 /** "Mening natijalarim": topshirilgan diktantlar va tez yozish mashqlari tarixi. */
 const ResultsView: React.FC<{ initialTab: number }> = ({ initialTab }) => {
     const [tab, setTab] = useState(initialTab);
-    const [works, setWorks] = useState<Work[] | null>(null);
-    const [typing, setTyping] = useState<TypingResult[] | null>(null);
     const [details, setDetails] = useState<TypingResult | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
+    const [syncing, setSyncing] = useState(false);
+    const { account, ready, openSignIn } = useAuth();
+    const history = useHistory();
+    const works = history?.works ?? null;
+    const typing = history?.typing ?? null;
+    const unsynced = history ? history.unsyncedTyping.length + history.unsyncedWorks.length : 0;
 
-    useEffect(() => {
-        setWorks(loadWorks());
-        setTyping(loadTypingResults());
-    }, []);
+    const syncLocal = async () => {
+        if (!account || !history || syncing) return;
+        setSyncing(true);
+        await syncHistory(account.id, history);
+        setSyncing(false);
+    };
 
     return (
-        <PageScaffold title="Mening natijalarim" className="!pt-4">
-            <div className="glass w-full self-start rounded-full p-1.5 shadow-glow-soft sm:w-auto">
+        <DashboardPage
+            title="Mening natijalarim"
+            subtitle={
+                account
+                    ? 'Natijalaringiz hisobingizda saqlanadi va istalgan qurilmada körinadi.'
+                    : 'Natijalar şu qurilmada saqlanadi. Hisobingizga kirsangiz, istalgan qurilmada körasiz.'
+            }
+            actions={
+                ready && !account ? (
+                    <AppButton variant="outline" onClick={openSignIn} className="!min-h-[40px]">
+                        Kiriş
+                    </AppButton>
+                ) : undefined
+            }
+        >
+            {account && unsynced > 0 && (
+                <div className="mt-6 flex flex-col items-start gap-3 rounded-2xl border border-primary/25 bg-primary/5 p-4 sm:flex-row sm:items-center">
+                    <LuUploadCloud size={22} className="shrink-0 text-primary" aria-hidden />
+                    <p className="flex-1 text-sm">Şu qurilmada hisobingizga yuklanmagan {unsynced} ta natija bor.</p>
+                    <AppButton onClick={syncLocal} className="!min-h-[40px] !px-5">
+                        {syncing ? 'Yuklanmoqda…' : 'Hisobga yuklaş'}
+                    </AppButton>
+                </div>
+            )}
+            <div className="glass mt-6 w-full self-start rounded-full p-1.5 shadow-glow-soft sm:w-auto">
                 <SectionTabs index={tab} onChange={setTab} expand />
             </div>
 
@@ -40,14 +81,14 @@ const ResultsView: React.FC<{ initialTab: number }> = ({ initialTab }) => {
                 works === null ? (
                     <Spinner className="flex-1" />
                 ) : works.length === 0 ? (
-                    <EmptyState icon={<LuInbox aria-hidden />} text="Sizda topshirilgan diktantlar yo‘q" />
+                    <EmptyState icon={<LuInbox aria-hidden />} text="Sizda topşirilgan diktantlar yöq" />
                 ) : (
                     works.map(work => <WorkCard key={work.id} work={work} />)
                 )
             ) : typing === null ? (
                 <Spinner className="flex-1" />
             ) : typing.length === 0 ? (
-                <EmptyState icon={<LuInbox aria-hidden />} text="Hali tez yozish mashqini bajarmagansiz" />
+                <EmptyState icon={<LuInbox aria-hidden />} text="Hali tez yoziş maşqini bajarmagansiz" />
             ) : (
                 <>
                     <TypingSummary results={typing} />
@@ -68,11 +109,11 @@ const ResultsView: React.FC<{ initialTab: number }> = ({ initialTab }) => {
                 {details && <TypingResultView result={details} />}
                 <div className="mt-6 flex justify-center">
                     <AppButton variant="ghost" onClick={() => setDetailsOpen(false)}>
-                        Yopish
+                        Yopiş
                     </AppButton>
                 </div>
             </Modal>
-        </PageScaffold>
+        </DashboardPage>
     );
 };
 
@@ -97,9 +138,9 @@ const WorkCard: React.FC<{ work: Work }> = ({ work }) => {
                     </span>
                     <span className="mt-2.5 flex flex-wrap gap-x-5 gap-y-2">
                         <MetaChip icon={<LuTimer aria-hidden />}>Sarflangan vaqt: {formatTime(work.worktime)}</MetaChip>
-                        <MetaChip icon={<LuType aria-hidden />}>So‘zlar soni: {work.text.length} ta</MetaChip>
+                        <MetaChip icon={<LuType aria-hidden />}>Sözlar soni: {work.text.length} ta</MetaChip>
                         <MetaChip icon={<LuPersonStanding aria-hidden />}>
-                            Yosh chegarasi: {work.text.ageName} yosh, ({work.text.className})
+                            Yoş çegarasi: {work.text.ageName} yoş, ({work.text.className})
                         </MetaChip>
                     </span>
                 </span>
@@ -118,10 +159,10 @@ const TypingSummary: React.FC<{ results: TypingResult[] }> = ({ results }) => {
 
     return (
         <div className="mt-4 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
-            <StatTile className={tileClass} label="Eng yaxshi (WPM)" value={`${Math.round(best)}`} valueClassName="text-primary" />
-            <StatTile className={tileClass} label="O‘rtacha (WPM)" value={`${Math.round(average)}`} />
-            <StatTile className={tileClass} label="O‘rtacha aniqlik" value={`${Math.round(accuracy)}%`} />
-            <StatTile className={tileClass} label="Mashqlar" value={`${results.length} ta`} />
+            <StatTile className={tileClass} label="Eng yaxşi (WPM)" value={`${Math.round(best)}`} valueClassName="text-primary" />
+            <StatTile className={tileClass} label="Örtaça (WPM)" value={`${Math.round(average)}`} />
+            <StatTile className={tileClass} label="Örtaça aniqlik" value={`${Math.round(accuracy)}%`} />
+            <StatTile className={tileClass} label="Maşqlar" value={`${results.length} ta`} />
         </div>
     );
 };
@@ -129,7 +170,8 @@ const TypingSummary: React.FC<{ results: TypingResult[] }> = ({ results }) => {
 const TypingCard: React.FC<{ result: TypingResult; onOpen: () => void }> = ({ result, onOpen }) => {
     const flags = [
         typingConfigLabel(result.config),
-        result.config.punctuation && 'tinish belgilari',
+        result.config.alphabet !== 'lotin' && typingAlphabetLabel(result.config),
+        result.config.punctuation && 'tiniş belgilari',
         result.config.numbers && 'raqamlar',
     ]
         .filter(Boolean)
