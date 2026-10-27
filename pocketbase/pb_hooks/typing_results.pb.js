@@ -1,16 +1,13 @@
 /// <reference path="../pb_data/types.d.ts" />
 
 /**
- * Tez yozish natijasi brauzerda hisoblanadi, shuning uchun reytingni soxta
- * natijalardan himoyalash uchun server ikki narsani tekshiradi:
+ * To'g'ridan-to'g'ri yuklangan tez yozish natijasi (kirishdan oldingi yoki
+ * yuborilmay qolgan natijalar, ilovaning eski versiyalari): u brauzerda
+ * hisoblangan, server uni tasdiqlay olmaydi. Shuning uchun natija mantiqan
+ * tekshiriladi (`lib/integrity.js`, aks holda rad etiladi) va faqat tarixda
+ * saqlanadi — reytingga kirmaydi (`ranked = false`, `verified = false`).
  *
- * 1. Natija mantiqan to'g'ri: davomiylik sozlamaga, WPM va aniqlik terilgan
- *    belgilar va bosishlarga mos (`lib/integrity.js`). Aks holda rad etiladi.
- * 2. Real vaqt: oldingi reytingdagi natijadan beri kamida shu mashq
- *    davomiyligicha vaqt o'tgan. Aks holda natija saqlanadi (boshqa qurilmada
- *    ko'rinadi), lekin reytingga kirmaydi (`ranked = false`) — masalan,
- *    kirishdan oldingi natijalar birdaniga yuklanganda yoki skript bilan
- *    ketma-ket yuborilganda.
+ * Reytingga faqat server tekshirgan mashqlar kiradi: `typing_api.pb.js`.
  */
 onRecordCreateRequest(e => {
     const { checkTyping } = require(`${__hooks}/lib/integrity.js`);
@@ -23,7 +20,6 @@ onRecordCreateRequest(e => {
         throw new BadRequestError('Natija noto‘g‘ri.');
     }
 
-    const seconds = record.getFloat('seconds');
     const error = checkTyping({
         mode: record.getString('mode'),
         amount: record.getInt('amount'),
@@ -34,25 +30,14 @@ onRecordCreateRequest(e => {
         incorrect: record.getInt('incorrect_chars'),
         extra: record.getInt('extra_chars'),
         missed: record.getInt('missed_chars'),
-        seconds,
+        seconds: record.getFloat('seconds'),
         samples,
     });
     if (error) throw new BadRequestError(error);
 
-    const last = $app.findRecordsByFilter(
-        'typing_results',
-        'user = {:user} && ranked = true',
-        '-created',
-        1,
-        0,
-        { user: record.getString('user') }
-    );
-    let ranked = true;
-    if (last.length > 0) {
-        const lastCreated = new Date(last[0].getString('created').replace(' ', 'T')).getTime();
-        ranked = Date.now() - lastCreated >= (seconds - 2) * 1000;
-    }
-    record.set('ranked', ranked);
+    record.set('ranked', false);
+    record.set('verified', false);
+    record.set('flagged', false);
 
     e.next();
 }, 'typing_results');

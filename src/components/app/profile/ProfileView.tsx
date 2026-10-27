@@ -8,6 +8,7 @@ import { accountErrorMessage, changePassword, requestPasswordReset, updateName }
 import { formatDate } from '@/lib/app/format';
 import { computeStreak, History } from '@/lib/app/history';
 import { TypingSample } from '@/lib/app/typing/engine';
+import { isTrustedTypingResult } from '@/lib/app/typing/result';
 import { useAuth } from '../auth/AuthProvider';
 import DashboardPage from '../DashboardPage';
 import { FormError, TextField } from '../form';
@@ -54,7 +55,7 @@ const ProfileView: React.FC = () => {
     const streak = history ? computeStreak(history) : null;
     const typing = history?.typing ?? [];
     const works = history?.works ?? [];
-    const bestWpm = typing.length ? Math.max(...typing.map(r => r.wpm)) : 0;
+    const bestWpm = Math.max(0, ...typing.filter(isTrustedTypingResult).map(r => r.wpm));
     const averageBaho = works.length ? works.reduce((sum, w) => sum + w.baho, 0) / works.length : 0;
     const tileClass = 'w-auto';
 

@@ -22,24 +22,29 @@ alohida cron kerak emas, view'lar sanani so'rov paytida hisoblaydi.
 
 ### Reytingni g'irromlikdan himoyalash
 
-- `pb_hooks/typing_results.pb.js` — tez yozish natijasini mantiqiy tekshiradi:
-  davomiylik sozlamaga, WPM, aniqlik va grafik kesimlari terilgan belgilar va
-  bosishlarga mos bo'lishi kerak (WPM ≤ 250). Oldingi reytingdagi natijadan
-  beri mashq davomiyligicha real vaqt o'tmagan bo'lsa, natija saqlanadi,
-  lekin reytingga kirmaydi (`ranked = false`).
-- `pb_hooks/dictation_works.pb.js` — diktant natijasini serverdagi asl matn
+- **Tez yozish** — `pb_hooks/typing_api.pb.js` (mantiq: `pb_hooks/lib/typing_api.js`):
+  - `POST /api/imlogo/typing/start` — so'zlarni server tanlaydi, mashqni
+    `typing_tests` ga yozadi (daqiqasiga 30 tadan ko'p emas);
+  - `POST /api/imlogo/typing/submit` — brauzer faqat bosishlar logini yuboradi;
+    server uni shu so'zlar ustida qayta o'ynab, natijani o'zi hisoblaydi,
+    evristikalar (`src/lib/app/typing/guard.ts`: bir zumda ko'p belgi, bir xil
+    marom, nusxalash, klavishsiz kiritish, 250 WPM dan tez) va server vaqti
+    bo'yicha tekshiradi. Mashq bir martalik; shubhali natija `flagged = true`
+    bilan saqlanadi va reytingga kirmaydi.
+  - To'g'ridan-to'g'ri yuklangan natija (`typing_results.pb.js`: kirishdan
+    oldingi natijalar, ilovaning eski versiyalari) mantiqan tekshiriladi va
+    faqat tarixda saqlanadi (`ranked = false`).
+- **Diktant** — `pb_hooks/dictation_works.pb.js` natijani serverdagi asl matn
   bo'yicha qayta baholaydi; brauzer yuborgan `ball`/`baho` hisobga olinmaydi.
-  Mavjud bo'lmagan diktant uchun natija qabul qilinmaydi.
-- Umumiy mantiq: `pb_hooks/lib/integrity.js`. `pb_hooks/lib/evaluator.js` —
-  saytdagi `src/lib/app/evaluator.ts` dan avtomatik yasaladi:
-  `src/lib/app/evaluator.ts` o'zgarsa, `npm run pb:evaluator` ni ishga tushirib,
-  faylni serverga qayta nusxalang.
-- Migratsiya `1793092000_leaderboard_integrity.js` view'larni yangilaydi va
-  mavjud natijalarni yangi qoidalar bo'yicha qayta tekshiradi.
+- `pb_hooks/lib/evaluator.js`, `typing.js` va `data/` saytdagi koddan
+  yasaladi: `src/lib/app/evaluator.ts`, `src/lib/app/typing/*` yoki so'zlar
+  ro'yxati o'zgarsa, `npm run pb:lib` ni ishga tushirib, `pb_hooks/lib/` ni
+  serverga qayta nusxalang. Testlar: `npm run typing:test`.
 
-To'liq himoya mumkin emas: tez yozish brauzerda o'lchanadi, diktant matni esa
-brauzerda tekshirilishi uchun API orqali ochiq. Ishonarli soxta natijani real
-vaqt sarflab yuborgan foydalanuvchini faqat moderatsiya to'xtatadi.
+To'liq himoya mumkin emas: odamga o'xshab, real vaqtda yozadigan murakkab
+botni faqat moderatsiya to'xtatadi (`typing_tests.log` da har bir natijaning
+bosishlar logi 30 kun saqlanadi). Diktant matni esa brauzerda tekshirilishi
+uchun API orqali ochiq.
 
 ## 2. Google orqali kirish
 

@@ -2,7 +2,8 @@ import PocketBase, { ClientResponseError, RecordModel } from 'pocketbase';
 
 import { BASE_URL } from './pocketbase';
 import { packSample, StoredSample, unpackSample } from './storage';
-import { parseTypingConfig } from './typing/config';
+import { TypingConfig, parseTypingConfig } from './typing/config';
+import { TypingFlag, TypingLogEntry } from './typing/guard';
 import { TypingResult } from './typing/result';
 import { Work } from './types';
 
@@ -101,6 +102,7 @@ interface TypingRecord extends RecordModel {
     missed_chars: number;
     seconds: number;
     samples: StoredSample[] | null;
+    flag_reasons: TypingFlag[] | null;
     created: string;
 }
 
@@ -119,6 +121,7 @@ const fromTypingRecord = (record: TypingRecord): TypingResult => ({
     missedChars: record.missed_chars,
     seconds: record.seconds,
     samples: (record.samples ?? []).map(unpackSample),
+    flags: record.flag_reasons?.length ? record.flag_reasons : undefined,
 });
 
 export const uploadTypingResult = (userId: string, result: TypingResult) =>
@@ -146,6 +149,35 @@ export const uploadTypingResult = (userId: string, result: TypingResult) =>
             },
             { requestKey: null }
         );
+
+/**
+ * Server tekshiradigan mashq: so'zlarni server beradi, natijani esa bosishlar
+ * logidan o'zi hisoblaydi (`pocketbase/pb_hooks/typing_api.pb.js`). Faqat
+ * shunday natijalar reytingga kiradi; `uploadTypingResult` orqali yuklangani
+ * (kirishdan oldingi yoki yuborilmay qolgan natijalar) faqat tarixda saqlanadi.
+ */
+export interface TypingTest {
+    id: string;
+    words: string[];
+}
+
+export const startTypingTest = (config: TypingConfig): Promise<TypingTest> =>
+    pb().send<TypingTest>('/api/imlogo/typing/start', { method: 'POST', body: config, requestKey: null });
+
+export interface TypingVerdict {
+    result: TypingResult;
+    /** Natija reytingga kirdimi. */
+    ranked: boolean;
+    flags: TypingFlag[];
+}
+
+export const submitTypingTest = async (testId: string, localId: string, log: TypingLogEntry[]): Promise<TypingVerdict> => {
+    const response = await pb().send<{ record: TypingRecord; ranked: boolean; flags: TypingFlag[] }>(
+        '/api/imlogo/typing/submit',
+        { method: 'POST', body: { testId, localId, log }, requestKey: null }
+    );
+    return { result: fromTypingRecord(response.record), ranked: response.ranked, flags: response.flags };
+};
 
 /** Foydalanuvchining serverdagi natijalari, eng yangisi birinchi. */
 export const fetchMyTypingResults = async (userId: string): Promise<TypingResult[]> => {

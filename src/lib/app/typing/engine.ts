@@ -175,19 +175,26 @@ export class TypingEngine {
      * kechiksa (sahifa band, energiya tejash rejimi), bosishlar keyingi
      * soniyaga o'tib ketmasin va so'zlar rejimida yakunda yo'qolmasin —
      * server kesimlardagi bosishlar sonini natija bilan solishtiradi.
+     *
+     * Har bir to'liq soniya uchun alohida kesim soniya chegarasidagi holat
+     * bo'yicha yoziladi (chaqiruv payti emas) — natija taymerga bog'liq emas va
+     * server bosishlar logini qayta o'ynaganda aynan shu kesimlar chiqadi.
      */
     private sampleUntil(elapsedMs: number) {
         if (!this.started) return;
-        const second = Math.floor(elapsedMs / 1000);
-        if (second <= this.samples.length) return;
-        this.samples.push({
-            second,
-            wpm: this.stats(elapsedMs).wpm,
-            raw: this.secondKeys * 12,
-            errors: this.secondErrors,
-        });
-        this.secondKeys = 0;
-        this.secondErrors = 0;
+        let until = Math.floor(elapsedMs / 1000);
+        if (this.config.mode === 'time') until = Math.min(until, this.config.amount);
+        while (this.samples.length < until) {
+            const second = this.samples.length + 1;
+            this.samples.push({
+                second,
+                wpm: this.stats(second * 1000).wpm,
+                raw: this.secondKeys * 12,
+                errors: this.secondErrors,
+            });
+            this.secondKeys = 0;
+            this.secondErrors = 0;
+        }
     }
 
     private finish(elapsedMs: number) {

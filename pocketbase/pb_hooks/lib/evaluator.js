@@ -1,4 +1,4 @@
-// Avtomatik yaratilgan: node scripts/build-pb-evaluator.ts — qo‘lda o‘zgartirmang.
+// Avtomatik yaratilgan: npm run pb:lib — qo‘lda o‘zgartirmang.
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DiktantEvaluator = void 0;

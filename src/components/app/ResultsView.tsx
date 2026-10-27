@@ -18,7 +18,7 @@ import clsx from 'clsx';
 import { formatDate, formatTime, rateColor } from '@/lib/app/format';
 import { syncHistory } from '@/lib/app/history';
 import { typingAlphabetLabel, typingConfigLabel } from '@/lib/app/typing/config';
-import { TypingResult } from '@/lib/app/typing/result';
+import { isTrustedTypingResult, TypingResult } from '@/lib/app/typing/result';
 import { Work } from '@/lib/app/types';
 import { useAuth } from './auth/AuthProvider';
 import DashboardPage from './DashboardPage';
@@ -152,7 +152,8 @@ const WorkCard: React.FC<{ work: Work }> = ({ work }) => {
 };
 
 const TypingSummary: React.FC<{ results: TypingResult[] }> = ({ results }) => {
-    const best = Math.max(...results.map(r => r.wpm));
+    // Shubhali natijalar rekordga kirmaydi.
+    const best = Math.max(0, ...results.filter(isTrustedTypingResult).map(r => r.wpm));
     const average = results.reduce((sum, r) => sum + r.wpm, 0) / results.length;
     const accuracy = results.reduce((sum, r) => sum + r.accuracy, 0) / results.length;
     const tileClass = 'w-auto sm:w-[150px]';
