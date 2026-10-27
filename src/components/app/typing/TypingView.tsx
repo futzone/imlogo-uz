@@ -8,11 +8,12 @@ import Badge from '@/components/ui/Badge';
 import { uploadTypingResult } from '@/lib/app/account';
 import { invalidateHistory } from '@/lib/app/history';
 import { loadTypingConfig, loadTypingResults, saveTypingConfig, saveTypingResult } from '@/lib/app/storage';
-import { defaultTypingConfig, isSameTypingConfig, TypingConfig } from '@/lib/app/typing/config';
+import { defaultTypingConfig, effectiveTypingConfig, isSameTypingConfig, TypingConfig } from '@/lib/app/typing/config';
 import { composeYangi } from '@/lib/app/typing/compose';
 import { TypingEngine } from '@/lib/app/typing/engine';
+import { isRoboticTyping } from '@/lib/app/typing/guard';
 import { TypingResult, typingResultFromEngine } from '@/lib/app/typing/result';
-import { createWordGenerator, loadTypingWords } from '@/lib/app/typing/words';
+import { createSentenceWords, createWordGenerator, loadTypingPool } from '@/lib/app/typing/words';
 import { useAuth } from '../auth/AuthProvider';
 import { IconButton, Spinner } from '../ui';
 import TypingConfigBar from './TypingConfigBar';
@@ -27,6 +28,9 @@ import TypingWords from './TypingWords';
 const SENTINEL = String.fromCharCode(0x200b);
 const TICK_MS = 100;
 
+/** Bir xil kalitli sozlamalar bitta so'zlar to'plamidan foydalanadi. */
+const poolKey = (config: TypingConfig) => `${config.alphabet}:${config.mode === 'sentences' ? 'gaplar' : 'sözlar'}`;
+
 /** Tez yozish mashqi (monkeytype uslubida, o'zbekcha so'zlar bilan). */
 const TypingView: React.FC = () => {
     const rootRef = useRef<HTMLDivElement>(null);
@@ -38,6 +42,10 @@ const TypingView: React.FC = () => {
     const firstEngineRef = useRef(true);
     // Yangi alifbo: "s" terilib, "h" kutilayotgan harf o'rni (qarang: composeYangi).
     const pendingRef = useRef<number | null>(null);
+    // Haqiqiy (brauzer yuborgan) klavish bosishlari: matn faqat ulardan keyin qabul qilinadi.
+    const keydownsRef = useRef(0);
+    // Bosishlar payti — avtomatik yozishni aniqlash uchun (qarang: isRoboticTyping).
+    const keyTimesRef = useRef<number[]>([]);
 
     // Dvigatel o'zgaruvchan obyekt — har o'zgarishda ekran qo'lda yangilanadi.
     const [, rerender] = useReducer((count: number) => count + 1, 0);
@@ -47,6 +55,7 @@ const TypingView: React.FC = () => {
     const [engine, setEngine] = useState<TypingEngine | null>(null);
     const [result, setResult] = useState<TypingResult | null>(null);
     const [previousBest, setPreviousBest] = useState<number | null>(null);
+    const [robotic, setRobotic] = useState(false);
     const [focused, setFocused] = useState(false);
     const { account } = useAuth();
 
@@ -61,16 +70,22 @@ const TypingView: React.FC = () => {
         stopTimer();
         startedAtRef.current = null;
         pendingRef.current = null;
+        keydownsRef.current = 0;
+        keyTimesRef.current = [];
         setResult(null);
         setPreviousBest(null);
-        setEngine(new TypingEngine(nextConfig, createWordGenerator(words, nextConfig)));
+        setRobotic(false);
+        const config = effectiveTypingConfig(nextConfig);
+        const source =
+            config.mode === 'sentences' ? createSentenceWords(words, config.amount) : createWordGenerator(words, config);
+        setEngine(new TypingEngine(config, source));
     }, []);
 
     useEffect(() => {
         const saved = loadTypingConfig();
         configRef.current = saved;
         setConfig(saved);
-        loadTypingWords(saved.alphabet)
+        loadTypingPool(saved)
             .then(words => {
                 setPool(words);
                 restart(words, saved);
@@ -95,19 +110,19 @@ const TypingView: React.FC = () => {
     };
 
     const changeConfig = (next: TypingConfig) => {
-        const alphabetChanged = next.alphabet !== configRef.current.alphabet;
+        const poolChanged = poolKey(next) !== poolKey(configRef.current);
         configRef.current = next;
         setConfig(next);
         saveTypingConfig(next);
-        if (!alphabetChanged) {
+        if (!poolChanged) {
             if (pool) restart(pool, next);
             return;
         }
         setEngine(null);
-        loadTypingWords(next.alphabet)
+        loadTypingPool(next)
             .then(words => {
-                // Yuklanish paytida yana boshqa yozuv tanlangan bo'lishi mumkin.
-                if (configRef.current.alphabet !== next.alphabet) return;
+                // Yuklanish paytida yana boshqa yozuv yoki rejim tanlangan bo'lishi mumkin.
+                if (poolKey(configRef.current) !== poolKey(next)) return;
                 setPool(words);
                 restart(words, configRef.current);
             })
@@ -124,8 +139,12 @@ const TypingView: React.FC = () => {
         // Natija ko'rsatilganda klaviatura (Enter, Esc) shu blokda tinglanadi.
         rootRef.current?.focus();
 
+        // Script bilan yozilgan natija saqlanmaydi va reytingga yuborilmaydi.
+        const isRobotic = isRoboticTyping(keyTimesRef.current);
+        setRobotic(isRobotic);
+
         // Hech narsa terilmagan mashq tarixga yozilmaydi.
-        if (finishedResult.correctChars + finishedResult.incorrectChars > 0) {
+        if (!isRobotic && finishedResult.correctChars + finishedResult.incorrectChars > 0) {
             saveTypingResult(finishedResult);
             // Kirgan foydalanuvchi natijasi serverga ham yoziladi; yozilmasa, qurilmada qoladi
             // va "Natijalarim" sahifasidan keyinroq yuklanadi.
@@ -144,6 +163,18 @@ const TypingView: React.FC = () => {
         const input = event.target;
         const value = input.value;
         const now = elapsed();
+
+        // Script bilan yozishga to'siq: JS yuborgan soxta hodisa yoki klavish bosilmasdan
+        // qo'yilgan matn (`execCommand`, sudrab tashlash) qabul qilinmaydi. Telefondagi
+        // so'z takliflari (`insertReplacementText`) va IME kiritishi bunga kirmaydi.
+        const native = event.nativeEvent as InputEvent;
+        const unkeyed = native.inputType === 'insertText' || native.inputType === 'insertFromDrop';
+        if (!native.isTrusted || (unkeyed && keydownsRef.current === 0)) {
+            input.value = SENTINEL + engine.current;
+            return;
+        }
+        keydownsRef.current = 0;
+        if (value.length > SENTINEL.length + engine.current.length) keyTimesRef.current.push(performance.now());
 
         if (!value.startsWith(SENTINEL)) {
             pendingRef.current = null;
@@ -184,6 +215,7 @@ const TypingView: React.FC = () => {
     const handleKeyDown = (event: React.KeyboardEvent) => {
         const { target, key } = event;
         const inTest = target === inputRef.current;
+        if (inTest && event.nativeEvent.isTrusted) keydownsRef.current++;
         const onControl = target instanceof HTMLButtonElement || target instanceof HTMLAnchorElement;
         const restartKey =
             key === 'Escape' || (key === 'Tab' && inTest) || (key === 'Enter' && result !== null && !onControl);
@@ -235,6 +267,7 @@ const TypingView: React.FC = () => {
                     <TypingResultView
                         result={result}
                         previousBest={previousBest}
+                        notice={robotic ? 'Natija saqlanmadi: avtomatik yozişga öxşaydi' : undefined}
                         onRestart={restartNow}
                         historyHref="/app/natijalar?tab=1"
                     />
@@ -273,6 +306,7 @@ const TypingView: React.FC = () => {
                                 onFocus={() => setFocused(true)}
                                 onBlur={() => setFocused(false)}
                                 onPaste={event => event.preventDefault()}
+                                onDrop={event => event.preventDefault()}
                                 type="text"
                                 inputMode="text"
                                 autoComplete="off"

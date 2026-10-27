@@ -54,7 +54,58 @@ export const loadTypingWords = (alphabet: Alphabet = 'lotin'): Promise<string[]>
     return promise;
 };
 
+/** `public/words/uz-sentences.txt`: har qatorda bitta gap (`npm run typing:sentences`). */
+export const parseSentenceList = (raw: string): string[] =>
+    raw
+        .split('\n')
+        .map(line => normalizeTypingText(line.trim()))
+        .filter(line => line !== '' && !line.startsWith('#'));
+
+const sentencesPromises = new Map<Alphabet, Promise<string[]>>();
+
+/** "Gaplar" rejimi uchun gaplar to'plami (har bir yozuv uchun bir marta tayyorlanadi). */
+export const loadTypingSentences = (alphabet: Alphabet = 'lotin'): Promise<string[]> => {
+    let promise = sentencesPromises.get(alphabet);
+    if (!promise) {
+        const latin = fetch('/words/uz-sentences.txt')
+            .then(response => {
+                if (!response.ok) throw new Error(`Gaplar yuklanmadi (${response.status})`);
+                return response.text();
+            })
+            .then(parseSentenceList);
+        promise = (
+            alphabet === 'lotin'
+                ? latin
+                : Promise.all([latin, loadLexicon()]).then(([sentences, lexicon]) =>
+                      sentences.map(sentence => normalizeTypingText(transliterate(sentence, 'lotin', alphabet, lexicon)))
+                  )
+        ).catch(error => {
+            sentencesPromises.delete(alphabet);
+            throw error;
+        });
+        sentencesPromises.set(alphabet, promise);
+    }
+    return promise;
+};
+
+/** Mashq uchun so'zlar to'plami: rejimga qarab alohida so'zlar yoki gaplar. */
+export const loadTypingPool = (config: TypingConfig): Promise<string[]> =>
+    config.mode === 'sentences' ? loadTypingSentences(config.alphabet) : loadTypingWords(config.alphabet);
+
 const randomInt = (max: number) => Math.floor(Math.random() * max);
+
+/** `count` ta tasodifiy gap (ketma-ket takrorlanmaydi) so'zlarga ajratilgan holda. */
+export const createSentenceWords = (pool: string[], count: number): string[] => {
+    const words: string[] = [];
+    let last = -1;
+    for (let i = 0; i < count; i++) {
+        let index = randomInt(pool.length);
+        if (index === last && pool.length > 1) index = (index + 1) % pool.length;
+        last = index;
+        words.push(...pool[index].split(' ').filter(word => word !== ''));
+    }
+    return words;
+};
 
 const SENTENCE_ENDINGS = ['.', '.', '.', '?', '!'];
 

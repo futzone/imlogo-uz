@@ -9,7 +9,8 @@
     "lint": "next lint",
     "translit:build": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-translit-lexicon.ts",
     "translit:test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-translit.ts",
-    "pb:evaluator": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-pb-evaluator.ts"
+    "pb:evaluator": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-pb-evaluator.ts",
+    "typing:sentences": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/build-typing-sentences.ts"
   },
   "dependencies": {
     "@headlessui/react": "^2.1.8",

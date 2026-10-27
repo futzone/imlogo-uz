@@ -47,11 +47,28 @@ export class TypingEngine {
     private secondKeys = 0;
     private secondErrors = 0;
 
+    private readonly nextWord: (() => string) | null;
+
+    /**
+     * `source` — so'z beruvchi funksiya (vaqt va so'zlar rejimi) yoki tayyor
+     * so'zlar ro'yxati (gaplar rejimi: mashq shu so'zlar terilganda tugaydi).
+     */
     constructor(
         readonly config: TypingConfig,
-        private readonly nextWord: () => string
+        source: (() => string) | readonly string[]
     ) {
+        if (typeof source === 'function') {
+            this.nextWord = source;
+        } else {
+            this.nextWord = null;
+            this.words.push(...source);
+        }
         this.fill();
+    }
+
+    /** Mashq so'zlar soni bilan cheklangan (vaqt rejimidan tashqari hammasi). */
+    private get fixedLength(): boolean {
+        return this.config.mode !== 'time';
     }
 
     get index(): number {
@@ -63,6 +80,7 @@ export class TypingEngine {
     }
 
     private fill() {
+        if (!this.nextWord) return;
         const wanted = this.config.mode === 'words' ? this.config.amount : this.typed.length + TIME_MODE_BUFFER;
         while (this.words.length < wanted) this.words.push(this.nextWord());
     }
@@ -84,6 +102,9 @@ export class TypingEngine {
      */
     setCurrent(value: string, elapsedMs = 0) {
         if (this.finished) return;
+        this.sampleUntil(elapsedMs);
+        this.checkTime(elapsedMs);
+        if (this.finished) return;
         const target = this.target;
         value = value.replace(/\s/g, '').slice(0, target.length + MAX_EXTRA_CHARS);
         if (value === this.current) return;
@@ -97,14 +118,17 @@ export class TypingEngine {
         }
         this.current = value;
 
-        // So'zlar rejimida oxirgi so'z to'g'ri terilishi bilan mashq yakunlanadi.
-        const isLastWord = this.config.mode === 'words' && this.index === this.words.length - 1;
+        // So'zlar va gaplar rejimida oxirgi so'z to'g'ri terilishi bilan mashq yakunlanadi.
+        const isLastWord = this.fixedLength && this.index === this.words.length - 1;
         if (isLastWord && isTypedWordCorrect(this.current, target)) this.commit(elapsedMs);
     }
 
     /** Bo'sh joy: joriy so'zni yakunlab, keyingisiga o'tadi. */
     commitWord(elapsedMs = 0) {
         if (this.finished || this.current === '') return;
+        this.sampleUntil(elapsedMs);
+        this.checkTime(elapsedMs);
+        if (this.finished) return;
         this.keystroke(true);
         this.commit(elapsedMs);
     }
@@ -112,7 +136,7 @@ export class TypingEngine {
     private commit(elapsedMs: number) {
         this.typed.push(this.current);
         this.current = '';
-        if (this.config.mode === 'words' && this.typed.length >= this.words.length) {
+        if (this.fixedLength && this.typed.length >= this.words.length) {
             this.finish(elapsedMs);
         } else {
             this.fill();
@@ -135,20 +159,35 @@ export class TypingEngine {
      */
     tick(elapsedMs: number) {
         if (!this.started || this.finished) return;
-        const second = Math.floor(elapsedMs / 1000);
-        if (second > this.samples.length) {
-            this.samples.push({
-                second,
-                wpm: this.stats(elapsedMs).wpm,
-                raw: this.secondKeys * 12,
-                errors: this.secondErrors,
-            });
-            this.secondKeys = 0;
-            this.secondErrors = 0;
-        }
-        if (this.config.mode === 'time' && second >= this.config.amount) {
+        this.sampleUntil(elapsedMs);
+        this.checkTime(elapsedMs);
+    }
+
+    /** Vaqt rejimida vaqt tugagan bo'lsa (taymer kechikkan bo'lsa ham), keyingi bosishlar hisobga olinmaydi. */
+    private checkTime(elapsedMs: number) {
+        if (this.started && this.config.mode === 'time' && elapsedMs >= this.config.amount * 1000) {
             this.finish(this.config.amount * 1000);
         }
+    }
+
+    /**
+     * O'tgan soniya kesimini yozadi. Klavish bosilganda ham chaqiriladi: taymer
+     * kechiksa (sahifa band, energiya tejash rejimi), bosishlar keyingi
+     * soniyaga o'tib ketmasin va so'zlar rejimida yakunda yo'qolmasin —
+     * server kesimlardagi bosishlar sonini natija bilan solishtiradi.
+     */
+    private sampleUntil(elapsedMs: number) {
+        if (!this.started) return;
+        const second = Math.floor(elapsedMs / 1000);
+        if (second <= this.samples.length) return;
+        this.samples.push({
+            second,
+            wpm: this.stats(elapsedMs).wpm,
+            raw: this.secondKeys * 12,
+            errors: this.secondErrors,
+        });
+        this.secondKeys = 0;
+        this.secondErrors = 0;
     }
 
     private finish(elapsedMs: number) {
@@ -176,7 +215,7 @@ export class TypingEngine {
 
             if (isTypedWordCorrect(input, word)) {
                 // So'zdan keyingi bo'sh joy ham hisobga olinadi (eng oxirgi so'zdan tashqari).
-                const hasSpace = this.config.mode === 'time' || i < this.words.length - 1;
+                const hasSpace = !this.fixedLength || i < this.words.length - 1;
                 wpmChars += word.length + (hasSpace ? 1 : 0);
             }
         }

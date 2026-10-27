@@ -10,12 +10,14 @@ interface Props {
     result: TypingResult;
     /** Shu sozlamadagi avvalgi eng yaxshi natija (bo'lmasa `null`). */
     previousBest?: number | null;
+    /** Natija ostidagi ogohlantirish (masalan, saqlanmagani haqida). */
+    notice?: string;
     onRestart?: () => void;
     historyHref?: string;
 }
 
 /** Mashq yakunidagi natija: tezlik, aniqlik, grafik va batafsil ko'rsatkichlar. */
-const TypingResultView: React.FC<Props> = ({ result, previousBest = null, onRestart, historyHref }) => {
+const TypingResultView: React.FC<Props> = ({ result, previousBest = null, notice, onRestart, historyHref }) => {
     const { config } = result;
     const isRecord = previousBest !== null && result.wpm > previousBest && result.wpm > 0;
     const headlineClass = 'font-mono text-[56px] font-medium leading-none sm:text-[80px]';
@@ -44,6 +46,12 @@ const TypingResultView: React.FC<Props> = ({ result, previousBest = null, onRest
                     <p className={captionClass}>aniqlik</p>
                 </div>
             </div>
+
+            {notice && (
+                <p role="alert" className="mt-4 rounded-xl border border-danger/30 bg-danger/10 px-4 py-2.5 text-center text-sm text-danger-deep">
+                    {notice}
+                </p>
+            )}
 
             <div className={`${cardClass} relative mt-6 h-[168px] w-full bg-white/80 pb-3 pl-4 pr-5 pt-4 sm:h-[208px]`}>
                 <CornerAccents />

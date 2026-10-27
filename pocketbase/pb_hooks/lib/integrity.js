@@ -28,12 +28,15 @@ const checkTyping = input => {
     if (wpm > MAX_WPM) return 'Natija noto‘g‘ri.';
 
     // Mashq davomiyligi sozlamaga mos bo'lishi kerak: vaqt rejimida aynan
-    // `amount` soniya, so'zlar rejimida esa `amount` ta so'z terilgan.
+    // `amount` soniya, so'zlar rejimida `amount` ta so'z, gaplar rejimida
+    // `amount` ta gap (to'plamda bo'sh joysiz 21–82 belgi; sh → ş, ш kabi harflar qisqartiradi) terilgan.
+    const targetChars = correct + incorrect + missed;
     if (mode === 'time') {
         if (Math.abs(seconds - amount) > 1) return 'Natija noto‘g‘ri.';
     } else if (mode === 'words') {
-        const targetChars = correct + incorrect + missed;
         if (targetChars < amount || targetChars > amount * 40) return 'Natija noto‘g‘ri.';
+    } else if (mode === 'sentences') {
+        if (amount > 50 || targetChars < amount * 12 || targetChars > amount * 120) return 'Natija noto‘g‘ri.';
     } else {
         return 'Natija noto‘g‘ri.';
     }
@@ -68,9 +71,10 @@ const checkTyping = input => {
         if (!isFiniteNumber(sampleRaw) || sampleRaw < 0) return 'Natija noto‘g‘ri.';
         sampledKeys += sampleRaw / 12;
     }
-    // Oxirgi to'liq bo'lmagan soniyadagi bosishlar kesimga tushmaydi.
+    // Oxirgi to'liq bo'lmagan soniyadagi bosishlar kesimga tushmaydi. Eski brauzer
+    // versiyasida sahifa qotib qolsa, yakunidagi bir necha soniya ham tushmay qolardi.
     const keysPerSecond = keys / seconds;
-    if (sampledKeys > keys + 2 || sampledKeys < keys - keysPerSecond * 2 - 10) return 'Natija noto‘g‘ri.';
+    if (sampledKeys > keys + 2 || sampledKeys < keys - keysPerSecond * 10 - 10) return 'Natija noto‘g‘ri.';
 
     return null;
 };
