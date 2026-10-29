@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { LuFlame, LuKeyRound, LuLogOut, LuPencil, LuUserCircle } from 'react-icons/lu';
+import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
+import { LuCamera, LuExternalLink, LuFlame, LuKeyRound, LuLogOut, LuPencil, LuTrash2, LuUserCircle } from 'react-icons/lu';
 import clsx from 'clsx';
 
-import { accountErrorMessage, changePassword, requestPasswordReset, updateName } from '@/lib/app/account';
+import { accountErrorMessage, changePassword, requestPasswordReset, updateAvatar, updateName } from '@/lib/app/account';
 import { formatDate } from '@/lib/app/format';
 import { computeStreak, History } from '@/lib/app/history';
 import { TypingSample } from '@/lib/app/typing/engine';
@@ -162,7 +163,7 @@ const NameCard: React.FC = () => {
 
     return (
         <section className={clsx(cardClass, 'mt-6 flex flex-col gap-4 p-5 sm:flex-row sm:items-center')}>
-            <Avatar account={account} className="!h-16 !w-16 !text-2xl" />
+            <AvatarPicker />
             {editing ? (
                 <form onSubmit={save} className="flex flex-1 flex-col gap-3">
                     <TextField
@@ -198,6 +199,13 @@ const NameCard: React.FC = () => {
                                 A’zo bölgan: {formatDate(account.createdAt).split(',')[0]}
                             </p>
                         )}
+                        <Link
+                            href={`/app/foydalanuvchi/${account.id}`}
+                            className="mt-1 inline-flex items-center gap-1 text-sm text-primary underline-offset-2 hover:underline"
+                        >
+                            <LuExternalLink size={14} aria-hidden />
+                            Boşqalar köradigan profil
+                        </Link>
                     </div>
                     <AppButton
                         variant="outline"
@@ -213,6 +221,75 @@ const NameCard: React.FC = () => {
                 </>
             )}
         </section>
+    );
+};
+
+/** Profil rasmi: bosilsa fayl tanlanadi; rasm bo'lsa — o'chirish tugmasi. */
+const AvatarPicker: React.FC = () => {
+    const { account } = useAuth();
+    const input = useRef<HTMLInputElement>(null);
+    const [busy, setBusy] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    if (!account) return null;
+
+    const save = async (file: File | null) => {
+        if (file && !file.type.startsWith('image/')) {
+            setError('Faqat rasm tanlang (JPG, PNG yoki WEBP)');
+            return;
+        }
+        setBusy(true);
+        setError(null);
+        try {
+            await updateAvatar(account.id, file);
+        } catch (e) {
+            setError(e instanceof Error && !('status' in e) ? e.message : accountErrorMessage(e));
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    return (
+        <div className="flex shrink-0 flex-col items-start gap-1.5 sm:items-center">
+            <button
+                type="button"
+                disabled={busy}
+                onClick={() => input.current?.click()}
+                aria-label="Profil rasmini tanlaş"
+                className="group relative rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+            >
+                <Avatar account={account} className={clsx('!h-20 !w-20 !text-3xl', busy && 'opacity-50')} />
+                <span className="absolute -bottom-0.5 -right-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-primary text-white shadow-glow transition-transform group-hover:scale-110">
+                    {busy ? (
+                        <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                    ) : (
+                        <LuCamera size={15} aria-hidden />
+                    )}
+                </span>
+            </button>
+            <input
+                ref={input}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="hidden"
+                onChange={event => {
+                    const file = event.target.files?.[0];
+                    event.target.value = '';
+                    if (file) save(file);
+                }}
+            />
+            {account.avatarUrl && !busy && (
+                <button
+                    type="button"
+                    onClick={() => save(null)}
+                    className="inline-flex items-center gap-1 text-xs text-muted hover:text-danger"
+                >
+                    <LuTrash2 size={12} aria-hidden />
+                    Rasmni öçiriş
+                </button>
+            )}
+            {error && <p className="max-w-[200px] text-xs text-danger-deep">{error}</p>}
+        </div>
     );
 };
 

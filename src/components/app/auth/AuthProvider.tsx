@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { ClientResponseError } from 'pocketbase';
 
-import { Account, pb, toAccount } from '@/lib/app/account';
+import { Account, pb, pingOnline, toAccount } from '@/lib/app/account';
 import AuthDialog from './AuthDialog';
 import FeedbackDialog from './FeedbackDialog';
 
@@ -16,6 +16,9 @@ interface AuthContextValue {
     openFeedback: () => void;
     signOut: () => void;
 }
+
+/** Faollik vaqti shu oraliqda yangilanadi (serverda ham daqiqasiga bir martadan ko'p yozilmaydi). */
+const PING_INTERVAL_MS = 5 * 60 * 1000;
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -51,6 +54,19 @@ const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
         }
         return unsubscribe;
     }, []);
+
+    // Oxirgi faollik vaqti (profilda "oxirgi marta onlayn"): sahifa ochiq va ko'rinib turganda.
+    const userId = account?.id;
+    useEffect(() => {
+        if (!userId) return;
+        const ping = () => document.visibilityState === 'visible' && pingOnline().catch(() => undefined);
+        const timer = setInterval(ping, PING_INTERVAL_MS);
+        document.addEventListener('visibilitychange', ping);
+        return () => {
+            clearInterval(timer);
+            document.removeEventListener('visibilitychange', ping);
+        };
+    }, [userId]);
 
     const signOut = useCallback(() => pb().authStore.clear(), []);
     const openSignIn = useCallback(() => setDialog('signIn'), []);

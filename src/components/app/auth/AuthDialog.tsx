@@ -4,7 +4,14 @@ import { useEffect, useState } from 'react';
 import { FcGoogle } from 'react-icons/fc';
 import { LuCheck, LuX } from 'react-icons/lu';
 
-import { accountErrorMessage, requestPasswordReset, signIn, signInWithGoogle, signUp } from '@/lib/app/account';
+import {
+    accountErrorMessage,
+    OAuthPopupError,
+    requestPasswordReset,
+    signIn,
+    signInWithGoogle,
+    signUp,
+} from '@/lib/app/account';
 import { FormError, Segmented, TextField } from '../form';
 import { Modal, ModalTitle } from '../Overlay';
 import { AppButton } from '../ui';
@@ -23,7 +30,9 @@ const AuthDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, on
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    /** Email forma yuborilmoqda. Google kutilayotganda forma bloklanmaydi. */
     const [busy, setBusy] = useState(false);
+    const [googleBusy, setGoogleBusy] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [notice, setNotice] = useState<string | null>(null);
 
@@ -35,16 +44,16 @@ const AuthDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, on
         }
     }, [open]);
 
-    const run = async (action: () => Promise<unknown>) => {
-        setBusy(true);
+    const run = async (action: () => Promise<unknown>, setPending: (pending: boolean) => void) => {
+        setPending(true);
         setError(null);
         try {
             await action();
             onClose();
         } catch (e) {
-            setError(accountErrorMessage(e));
+            setError(e instanceof OAuthPopupError ? e.message : accountErrorMessage(e));
         } finally {
-            setBusy(false);
+            setPending(false);
         }
     };
 
@@ -54,7 +63,7 @@ const AuthDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, on
             setError('Ismingizni kiriting — u reytingda körinadi');
             return;
         }
-        run(() => (mode === 'signIn' ? signIn(email, password) : signUp(name, email, password)));
+        run(() => (mode === 'signIn' ? signIn(email, password) : signUp(name, email, password)), setBusy);
     };
 
     return (
@@ -85,9 +94,9 @@ const AuthDialog: React.FC<{ open: boolean; onClose: () => void }> = ({ open, on
                 expand
                 className="mt-5"
                 icon={<FcGoogle size={20} aria-hidden />}
-                onClick={() => !busy && run(signInWithGoogle)}
+                onClick={() => !googleBusy && run(signInWithGoogle, setGoogleBusy)}
             >
-                Google orqali kiriş
+                {googleBusy ? 'Google oynasida davom eting…' : 'Google orqali kiriş'}
             </AppButton>
 
             <div className="my-4 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">

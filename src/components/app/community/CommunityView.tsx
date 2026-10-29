@@ -1,10 +1,20 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import clsx from 'clsx';
-import { LuCrown, LuHeadphones, LuHourglass, LuKeyboard, LuMedal, LuTrophy, LuUsers } from 'react-icons/lu';
+import { LuCrown, LuHeadphones, LuHourglass, LuKeyboard, LuMedal, LuSpellCheck, LuTrophy, LuUsers } from 'react-icons/lu';
 
-import { Board, fetchLeaderboard, fetchMyRank, LeaderboardPeriod, LeaderRow } from '@/lib/app/account';
+import {
+    avatarUrl,
+    Board,
+    fetchLeaderboard,
+    fetchMistakeWords,
+    fetchMyRank,
+    LeaderboardPeriod,
+    LeaderRow,
+    MistakeWord,
+} from '@/lib/app/account';
 import { useAuth } from '../auth/AuthProvider';
 import DashboardPage from '../DashboardPage';
 import { Segmented } from '../form';
@@ -102,9 +112,13 @@ const metrics: Record<Board, Metric[]> = {
     ],
 };
 
-const boards: { value: Board; label: string }[] = [
+/** Hamjamiyat yorliqlari: ikki reyting va xato so'zlar. */
+type Tab = Board | 'mistakes';
+
+const tabs: { value: Tab; label: string }[] = [
     { value: 'typing', label: 'Tez yoziş' },
     { value: 'dictation', label: 'Diktant' },
+    { value: 'mistakes', label: 'Xato sözlar' },
 ];
 
 const periods: { value: LeaderboardPeriod; label: string }[] = [
@@ -113,6 +127,8 @@ const periods: { value: LeaderboardPeriod; label: string }[] = [
 ];
 
 const displayName = (row: LeaderRow) => row.name?.trim() || 'Foydalanuvçi';
+const rowAccount = (row: LeaderRow) => ({ name: displayName(row), avatarUrl: avatarUrl(row.id, row.avatar) });
+const profileHref = (row: LeaderRow) => `/app/foydalanuvchi/${row.id}`;
 
 /** Haftalik musobaqa dushanba 00:00 (Toshkent, UTC+5) da yangilanadi. */
 const TASHKENT_OFFSET_MS = 5 * 3600 * 1000;
@@ -137,8 +153,25 @@ type State =
 
 /** "Hamjamiyat": tez yozish va diktant bo'yicha reytinglar hamda haftalik musobaqa. */
 const CommunityView: React.FC = () => {
+    const [tab, setTab] = useState<Tab>('typing');
+
+    return (
+        <DashboardPage
+            title="Hamjamiyat"
+            subtitle="Imlo Go foydalanuvçilari reytingi va haftalik musobaqa. Hisobingizga kiring — natijalaringiz reytingga avtomatik qöşiladi."
+        >
+            {tab === 'mistakes' ? (
+                <MistakeWords tabs={<Segmented className="mt-6 w-full md:w-auto md:self-start" options={tabs} value={tab} onChange={setTab} />} />
+            ) : (
+                <Leaderboards key={tab} board={tab} onTabChange={setTab} />
+            )}
+        </DashboardPage>
+    );
+};
+
+/** Tez yozish yoki diktant reytingi. */
+const Leaderboards: React.FC<{ board: Board; onTabChange: (tab: Tab) => void }> = ({ board, onTabChange }) => {
     const { account, ready, openSignIn } = useAuth();
-    const [board, setBoard] = useState<Board>('typing');
     const [metricIndex, setMetricIndex] = useState(0);
     const [period, setPeriod] = useState<LeaderboardPeriod>('week');
     const [state, setState] = useState<State>({ status: 'loading' });
@@ -166,22 +199,11 @@ const CommunityView: React.FC = () => {
     const view: State = state.status === 'ready' && state.key !== requestKey ? { status: 'loading' } : state;
 
     return (
-        <DashboardPage
-            title="Hamjamiyat"
-            subtitle="Imlo Go foydalanuvçilari reytingi va haftalik musobaqa. Hisobingizga kiring — natijalaringiz reytingga avtomatik qöşiladi."
-        >
+        <>
             <WeeklyBanner board={board} />
 
             <div className="mt-6 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                <Segmented
-                    className="w-full md:w-auto"
-                    options={boards}
-                    value={board}
-                    onChange={next => {
-                        setBoard(next);
-                        setMetricIndex(0);
-                    }}
-                />
+                <Segmented className="w-full md:w-auto" options={tabs} value={board} onChange={onTabChange} />
                 <Segmented className="w-full md:w-auto" options={periods} value={period} onChange={setPeriod} />
             </div>
             <Segmented
@@ -235,7 +257,73 @@ const CommunityView: React.FC = () => {
                     </ol>
                 </>
             )}
-        </DashboardPage>
+        </>
+    );
+};
+
+/** Diktantlarda eng ko'p xato qilinadigan so'zlar. */
+const MistakeWords: React.FC<{ tabs: React.ReactNode }> = ({ tabs: tabSwitch }) => {
+    const [words, setWords] = useState<MistakeWord[] | null | 'error'>(null);
+
+    useEffect(() => {
+        let cancelled = false;
+        fetchMistakeWords(50)
+            .then(list => !cancelled && setWords(list))
+            .catch(() => !cancelled && setWords('error'));
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    const top = Array.isArray(words) && words.length ? words[0].mistakes : 1;
+
+    return (
+        <>
+            {tabSwitch}
+            <p className="mt-2 text-xs text-muted">
+                Barça foydalanuvçilar diktantlarida eng köp xato yozilgan sözlar. Yonida — eng köp uçraydigan notöğri
+                yozilişi.
+            </p>
+            {words === null ? (
+                <Spinner className="flex-1 py-16" />
+            ) : words === 'error' ? (
+                <EmptyState
+                    icon={<LuSpellCheck aria-hidden />}
+                    tone="danger"
+                    text="Röyxatni yuklab bölmadi. Birozdan söng qayta urinib köring."
+                />
+            ) : words.length === 0 ? (
+                <EmptyState icon={<LuSpellCheck aria-hidden />} text="Hali ma’lumot yetarli emas. Diktant yozing!">
+                    <AppButton href="/app">Diktant yoziş</AppButton>
+                </EmptyState>
+            ) : (
+                <ol className="mt-4 flex flex-col gap-2">
+                    {words.map((item, i) => (
+                        <li key={item.word} className={clsx(cardClass, 'relative overflow-hidden px-4 py-3')}>
+                            <span
+                                className="absolute inset-y-0 left-0 bg-danger/[0.06]"
+                                style={{ width: `${Math.max(4, (item.mistakes / top) * 100)}%` }}
+                                aria-hidden
+                            />
+                            <div className="relative flex items-center gap-3 sm:gap-4">
+                                <span className="flex w-8 shrink-0 justify-center">{rankBadge(i + 1)}</span>
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate font-heading text-lg font-semibold leading-tight">{item.word}</p>
+                                    <p className="mt-0.5 truncate font-mono text-[11px] text-muted">
+                                        köpinça: <span className="text-danger-deep line-through decoration-danger/60">{item.variant}</span>
+                                        {' · '}
+                                        {item.users} kişi
+                                    </p>
+                                </div>
+                                <span className="shrink-0 text-right font-mono text-lg font-medium text-danger-deep">
+                                    {item.mistakes} ta
+                                </span>
+                            </div>
+                        </li>
+                    ))}
+                </ol>
+            )}
+        </>
     );
 };
 
@@ -286,12 +374,18 @@ const WeeklyBanner: React.FC<{ board: Board }> = ({ board }) => {
                     <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-white/75">Ötgan hafta ğoliblari</p>
                     <ol className="mt-2 flex flex-wrap gap-2">
                         {winners.map((row, i) => (
-                            <li key={row.id} className="flex items-center gap-2 rounded-full bg-white/15 py-1 pl-1 pr-3 text-sm">
-                                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white font-mono text-xs font-bold text-primary">
-                                    {i + 1}
-                                </span>
-                                <span className="max-w-[140px] truncate font-semibold">{displayName(row)}</span>
-                                <span className="font-mono text-xs text-white/80">{metric.format(row)}</span>
+                            <li key={row.id}>
+                                <Link
+                                    href={profileHref(row)}
+                                    className="flex items-center gap-2 rounded-full bg-white/15 py-1 pl-1 pr-3 text-sm transition-colors hover:bg-white/25"
+                                >
+                                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white font-mono text-xs font-bold text-primary">
+                                        {i + 1}
+                                    </span>
+                                    <Avatar account={rowAccount(row)} className="!h-7 !w-7 !border-white/40 !text-xs" />
+                                    <span className="max-w-[140px] truncate font-semibold">{displayName(row)}</span>
+                                    <span className="font-mono text-xs text-white/80">{metric.format(row)}</span>
+                                </Link>
                             </li>
                         ))}
                     </ol>
@@ -314,16 +408,17 @@ const LeaderItem: React.FC<{ rank: number; row: LeaderRow; metric: Metric; highl
     metric,
     highlight,
 }) => (
-    <div
+    <Link
+        href={profileHref(row)}
         className={clsx(
             cardClass,
-            'flex items-center gap-3 px-4 py-3 sm:gap-4',
+            'flex items-center gap-3 px-4 py-3 transition-colors hover:border-primary/40 sm:gap-4',
             highlight && '!border-primary/60 shadow-glow-card',
             rank <= 3 && 'bg-gradient-to-r from-tertiary/20 to-white'
         )}
     >
         <span className="flex w-8 shrink-0 justify-center">{rankBadge(rank)}</span>
-        <Avatar account={{ name: displayName(row) }} className="!h-9 !w-9 !text-sm" />
+        <Avatar account={rowAccount(row)} className="!h-9 !w-9 !text-sm" />
         <div className="min-w-0 flex-1">
             <p className="truncate font-semibold leading-tight">
                 {displayName(row)}
@@ -334,7 +429,7 @@ const LeaderItem: React.FC<{ rank: number; row: LeaderRow; metric: Metric; highl
         <span className="shrink-0 text-right font-mono text-lg font-medium text-primary sm:text-xl">
             {metric.format(row)}
         </span>
-    </div>
+    </Link>
 );
 
 export default CommunityView;

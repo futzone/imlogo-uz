@@ -46,6 +46,20 @@ botni faqat moderatsiya to'xtatadi (`typing_tests.log` da har bir natijaning
 bosishlar logi 30 kun saqlanadi). Diktant matni esa brauzerda tekshirilishi
 uchun API orqali ochiq.
 
+### Ochiq profillar va xato so'zlar
+
+`1793130000_public_profiles.js` + `pb_hooks/profiles.pb.js` (`lib/profiles.js`):
+
+| Kolleksiya | Vazifasi |
+|---|---|
+| `users.avatar` | Profil rasmi (jpeg/png/webp/gif, 2 MB, thumb 100x100 / 256x256) |
+| `users.last_seen` | Oxirgi faollik — faqat server yozadi (kirish, sessiya yangilash, `POST /api/imlogo/ping`) |
+| `profiles` | view: ism, rasm, ro'yxatdan o'tgan va oxirgi faol vaqt. Faqat id bo'yicha ochiladi |
+| `typing_public`, `dictation_public` | view: profilda ko'rinadigan natijalar (tez yozishda faqat `ranked`) |
+| `mistake_words` | view: diktantlarda eng ko'p xato yozilgan so'zlar va eng ko'p uchraydigan xato varianti |
+
+Reyting view'lariga `avatar` ustuni qo'shildi. Rasm manzili `users` kolleksiyasi orqali olinadi.
+
 ## 2. Google orqali kirish
 
 1. [Google Cloud Console](https://console.cloud.google.com/apis/credentials) → **Create credentials → OAuth client ID** → *Web application*.

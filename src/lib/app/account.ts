@@ -33,17 +33,36 @@ export interface Account {
     createdAt: string;
 }
 
+/** PocketBase sanasi ("2026-02-25 05:27:05.102Z") → ISO; bo'sh bo'lsa — `null`. */
+const isoDate = (value: unknown): string | null => (typeof value === 'string' && value ? value.replace(' ', 'T') : null);
+
+/**
+ * Foydalanuvchi rasmi manzili. Rasm `users` kolleksiyasida saqlanadi — view
+ * (reyting, profil) qatorlari uchun ham shu yerdan olinadi.
+ */
+export const avatarUrl = (userId: string, avatar: unknown, thumb: '100x100' | '256x256' = '100x100'): string | null =>
+    typeof avatar === 'string' && avatar
+        ? pb().files.getURL({ id: userId, collectionId: '_pb_users_auth_', collectionName: 'users' }, avatar, { thumb })
+        : null;
+
 export const toAccount = (record: RecordModel): Account => ({
     id: record.id,
     email: record.email ?? '',
     name: record.name || (record.email ?? '').split('@')[0],
-    avatarUrl: record.avatar ? pb().files.getURL(record, record.avatar, { thumb: '100x100' }) : null,
-    createdAt: (record.created ?? '').replace(' ', 'T'),
+    avatarUrl: avatarUrl(record.id, record.avatar),
+    createdAt: isoDate(record.created) ?? '',
 });
+
+/** Kirish so'rovi javob bermay qolsa, tugma "Kuting…" holatida qotib qolmasin. */
+const AUTH_TIMEOUT_MS = 30_000;
+const withTimeout = () => ({ signal: AbortSignal.timeout(AUTH_TIMEOUT_MS) });
 
 /** Server xatosini foydalanuvchiga tushunarli matnga aylantiradi. */
 export const accountErrorMessage = (error: unknown): string => {
     if (!(error instanceof ClientResponseError)) return 'Kutilmagan xatolik yuz berdi';
+    if (error.originalError instanceof DOMException && error.originalError.name === 'TimeoutError') {
+        return 'Server javob bermadi. Birozdan söng qayta urinib köring';
+    }
     if (error.isAbort) return 'Sörov bekor qilindi';
     if (error.status === 0) return 'Server bilan aloqa yöq. Internetni tekşiring';
     const fields = (error.response?.data ?? {}) as Record<string, { code?: string }>;
@@ -51,27 +70,101 @@ export const accountErrorMessage = (error: unknown): string => {
     if (fields.email) return 'Email manzili notöğri';
     if (fields.password) return 'Parol kamida 8 ta belgidan iborat bölişi kerak';
     if (fields.name) return 'Ism juda uzun';
+    if (fields.avatar) return 'Rasm 2 MB dan kiçik JPG, PNG yoki WEBP bölişi kerak';
     if (error.status === 400 && error.url.includes('auth-with-password')) return 'Email yoki parol notöğri';
     if (error.status === 429) return 'Juda köp uriniş. Birozdan söng qayta urinib köring';
     return error.message || 'Kutilmagan xatolik yuz berdi';
 };
 
 export const signIn = (email: string, password: string) =>
-    pb().collection('users').authWithPassword(email.trim(), password);
+    pb().collection('users').authWithPassword(email.trim(), password, withTimeout());
 
 export const signUp = async (name: string, email: string, password: string) => {
-    await pb().collection('users').create({
-        name: name.trim(),
-        email: email.trim(),
-        password,
-        passwordConfirm: password,
-        emailVisibility: false,
-    });
+    await pb()
+        .collection('users')
+        .create(
+            { name: name.trim(), email: email.trim(), password, passwordConfirm: password, emailVisibility: false },
+            withTimeout()
+        );
     return signIn(email, password);
 };
 
-/** Google orqali kirish — PocketBase yangi oynada Google sahifasini ochadi. */
-export const signInWithGoogle = () => pb().collection('users').authWithOAuth2({ provider: 'google' });
+/** Google oynasi yopilgani yoki ochilmagani haqidagi xato. */
+export class OAuthPopupError extends Error {}
+
+/**
+ * Google orqali kirish. Oyna bosish paytida (sinxron) ochiladi — aks holda
+ * brauzer uni bloklaydi. SDK oyna yopilganini sezmaydi va va'da abadiy
+ * kutib qoladi, shuning uchun oyna kuzatiladi: yopilsa, `OAuthPopupError`.
+ */
+export const signInWithGoogle = () => {
+    const width = Math.min(1024, window.innerWidth);
+    const height = Math.min(768, window.innerHeight);
+    const popup = window.open(
+        '',
+        'imlogo_oauth',
+        `width=${width},height=${height},left=${(window.innerWidth - width) / 2},top=${(window.innerHeight - height) / 2},resizable,menubar=no`
+    );
+    if (!popup) return Promise.reject(new OAuthPopupError('Brauzer Google oynasini blokladi. Qalqib çiquvçi oynalarga ruxsat bering'));
+
+    let timer: ReturnType<typeof setInterval> | undefined;
+    const closed = new Promise<never>((_, reject) => {
+        timer = setInterval(() => {
+            if (popup.closed) reject(new OAuthPopupError('Google oynasi yopildi'));
+        }, 500);
+    });
+    const auth = pb()
+        .collection('users')
+        .authWithOAuth2({
+            provider: 'google',
+            urlCallback: url => {
+                popup.location.href = url;
+            },
+        });
+    return Promise.race([auth, closed]).finally(() => {
+        clearInterval(timer);
+        if (!popup.closed) popup.close();
+    });
+};
+
+/** Oxirgi faollik vaqtini yangilash (`pocketbase/pb_hooks/profiles.pb.js`). */
+export const pingOnline = () => pb().send('/api/imlogo/ping', { method: 'POST', requestKey: null });
+
+/**
+ * Profil rasmini o'rnatish (`null` — o'chirish). Rasm brauzerda 256×256
+ * JPEG ga kichraytiriladi: tez yuklanadi va EXIF (joylashuv va h.k.) ketadi.
+ */
+export const updateAvatar = async (id: string, file: File | null) =>
+    pb()
+        .collection('users')
+        .update(id, { avatar: file ? await squareJpeg(file, 256) : null });
+
+const squareJpeg = async (file: File, size: number): Promise<File> => {
+    const bitmap = await createImageBitmap(file).catch(() => {
+        throw new Error('Rasmni öqib bölmadi');
+    });
+    const side = Math.min(bitmap.width, bitmap.height);
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = Math.min(size, side);
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('Rasmni öqib bölmadi');
+    // Markazdan kvadrat qirqiladi.
+    context.drawImage(
+        bitmap,
+        (bitmap.width - side) / 2,
+        (bitmap.height - side) / 2,
+        side,
+        side,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+    bitmap.close();
+    const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.88));
+    if (!blob) throw new Error('Rasmni öqib bölmadi');
+    return new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
+};
 
 export const updateName = (id: string, name: string) => pb().collection('users').update(id, { name: name.trim() });
 
@@ -82,7 +175,8 @@ export const changePassword = async (account: Account, oldPassword: string, pass
 };
 
 /** Parolni tiklash havolasini emailga yuboradi (serverda SMTP sozlangan bo'lishi kerak). */
-export const requestPasswordReset = (email: string) => pb().collection('users').requestPasswordReset(email.trim());
+export const requestPasswordReset = (email: string) =>
+    pb().collection('users').requestPasswordReset(email.trim(), withTimeout());
 
 // --- Tez yozish natijalari ---
 
@@ -234,8 +328,8 @@ export type Board = 'typing' | 'dictation';
 /** `week` — joriy hafta (dushanbadan, Toshkent vaqti), `prev_week` — o'tgan hafta. */
 export type LeaderboardPeriod = 'all' | 'week' | 'prev_week';
 
-/** View kolleksiyalardagi qator: ism va son ko'rsatkichlar. */
-export type LeaderRow = { id: string; name: string } & Record<string, number>;
+/** View kolleksiyalardagi qator: ism, rasm (fayl nomi) va son ko'rsatkichlar. */
+export type LeaderRow = { id: string; name: string; avatar?: string } & Record<string, number>;
 
 const periodSuffix: Record<LeaderboardPeriod, string> = { all: '', week: '_week', prev_week: '_prev_week' };
 
@@ -286,3 +380,126 @@ export type FeedbackKind = 'xatolik' | 'taklif' | 'savol' | 'boshqa';
 
 export const sendFeedback = (userId: string, kind: FeedbackKind, message: string, page: string) =>
     pb().collection('feedback').create({ user: userId, kind, message: message.trim(), page });
+
+// --- Ochiq profil ---
+
+export interface PublicProfile {
+    id: string;
+    name: string;
+    avatarUrl: string | null;
+    /** Ro'yxatdan o'tgan sana (ISO). */
+    createdAt: string | null;
+    /** Oxirgi faollik (ISO); hali belgilanmagan bo'lsa — `null`. */
+    lastSeen: string | null;
+}
+
+export interface PublicTypingResult {
+    id: string;
+    mode: string;
+    amount: number;
+    wpm: number;
+    accuracy: number;
+    createdAt: string;
+}
+
+export interface PublicDictationResult {
+    id: string;
+    dictationId: string;
+    title: string;
+    ball: number;
+    baho: number;
+    updatedAt: string;
+}
+
+export interface ProfileDetails {
+    profile: PublicProfile;
+    /** Hamma vaqt reytingidagi qatorlar (qatnashmagan bo'lsa — `null`). */
+    typing: LeaderRow | null;
+    dictation: LeaderRow | null;
+    /** Reytingdagi o'rni: eng tez (WPM) va eng ko'p ball. */
+    typingRank: number | null;
+    dictationRank: number | null;
+    bestTyping: PublicTypingResult[];
+    recentDictations: PublicDictationResult[];
+}
+
+const orNull = <T>(promise: Promise<T>) =>
+    promise.catch(error => {
+        if (error instanceof ClientResponseError && error.status === 404) return null;
+        throw error;
+    });
+
+const rankBy = async (collection: string, metric: string, value: number) => {
+    const ahead = await pb()
+        .collection(collection)
+        .getList(1, 1, { filter: pb().filter(`${metric} > {:value}`, { value }) });
+    return ahead.totalItems + 1;
+};
+
+/** Foydalanuvchi profili: ochiq ma'lumotlar, reytingdagi o'rni va natijalari. */
+export const fetchProfile = async (userId: string): Promise<ProfileDetails | null> => {
+    const byUser = pb().filter('user = {:id}', { id: userId });
+    const [record, typing, dictation, bestTyping, recentDictations] = await Promise.all([
+        orNull(pb().collection('profiles').getOne(userId)),
+        orNull(pb().collection('typing_leaderboard').getOne<LeaderRow & RecordModel>(userId)),
+        orNull(pb().collection('dictation_leaderboard').getOne<LeaderRow & RecordModel>(userId)),
+        pb().collection('typing_public').getList(1, 5, { filter: `${byUser} && accuracy >= 75`, sort: '-wpm', skipTotal: true }),
+        pb().collection('dictation_public').getList(1, 5, { filter: byUser, sort: '-updated', skipTotal: true }),
+    ]);
+    if (!record) return null;
+
+    const [typingRank, dictationRank] = await Promise.all([
+        typing && typing.best_wpm > 0 ? rankBy('typing_leaderboard', 'best_wpm', typing.best_wpm) : null,
+        dictation && dictation.total_ball > 0 ? rankBy('dictation_leaderboard', 'total_ball', dictation.total_ball) : null,
+    ]);
+
+    return {
+        profile: {
+            id: record.id,
+            name: (record.name ?? '').trim() || 'Foydalanuvçi',
+            avatarUrl: avatarUrl(record.id, record.avatar, '256x256'),
+            createdAt: isoDate(record.created),
+            lastSeen: isoDate(record.last_seen),
+        },
+        typing,
+        dictation,
+        typingRank,
+        dictationRank,
+        bestTyping: bestTyping.items.map(item => ({
+            id: item.id,
+            mode: item.mode,
+            amount: item.amount,
+            wpm: item.wpm,
+            accuracy: item.accuracy,
+            createdAt: isoDate(item.created) ?? '',
+        })),
+        recentDictations: recentDictations.items.map(item => ({
+            id: item.id,
+            dictationId: item.dictation_id,
+            title: item.title || 'Diktant',
+            ball: item.ball,
+            baho: item.baho,
+            updatedAt: isoDate(item.updated) ?? '',
+        })),
+    };
+};
+
+// --- Xato so'zlar ---
+
+export interface MistakeWord {
+    word: string;
+    /** Jami xatolar soni. */
+    mistakes: number;
+    /** Shu so'zda xato qilgan foydalanuvchilar soni. */
+    users: number;
+    /** Eng ko'p uchraydigan noto'g'ri yozilishi. */
+    variant: string;
+}
+
+/** Diktantlarda eng ko'p xato qilinadigan so'zlar (`mistake_words` view). */
+export const fetchMistakeWords = async (limit = 50): Promise<MistakeWord[]> => {
+    const list = await pb()
+        .collection('mistake_words')
+        .getList(1, limit, { sort: '-mistakes,-users', skipTotal: true });
+    return list.items.map(item => ({ word: item.word, mistakes: item.mistakes, users: item.users, variant: item.variant }));
+};
