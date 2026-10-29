@@ -484,22 +484,43 @@ export const fetchProfile = async (userId: string): Promise<ProfileDetails | nul
     };
 };
 
-// --- Xato so'zlar ---
+// --- Qiyin so'zlar ---
 
-export interface MistakeWord {
+export interface HardWord {
     word: string;
-    /** Jami xatolar soni. */
-    mistakes: number;
-    /** Shu so'zda xato qilgan foydalanuvchilar soni. */
+    /** Shu so'zda kamida bir marta xato qilgan foydalanuvchilar. */
     users: number;
-    /** Eng ko'p uchraydigan noto'g'ri yozilishi. */
-    variant: string;
+    /** Shu so'zni tergan foydalanuvchilar. */
+    typists: number;
+    attempts: number;
+    mistakes: number;
+    /** Xato ulushi, foizda. */
+    errorRate: number;
 }
 
-/** Diktantlarda eng ko'p xato qilinadigan so'zlar (`mistake_words` view). */
-export const fetchMistakeWords = async (limit = 50): Promise<MistakeWord[]> => {
+export type HardWordsSort = 'users' | 'rate';
+
+/** Kamida shuncha marta terilgan so'zlar "Eng qiyin" ro'yxatiga kiradi (tasodifiy 1/1 = 100% chiqmasin). */
+export const HARD_WORDS_MIN_ATTEMPTS = 10;
+
+/**
+ * Tez yozishda eng ko'p xato qilinadigan so'zlar (`typing_hard_words` view):
+ * `users` — eng ko'p odam xato qilgani, `rate` — xato ulushi eng yuqorisi.
+ */
+export const fetchHardWords = async (sort: HardWordsSort, limit = 50): Promise<HardWord[]> => {
     const list = await pb()
-        .collection('mistake_words')
-        .getList(1, limit, { sort: '-mistakes,-users', skipTotal: true });
-    return list.items.map(item => ({ word: item.word, mistakes: item.mistakes, users: item.users, variant: item.variant }));
+        .collection('typing_hard_words')
+        .getList(1, limit, {
+            sort: sort === 'users' ? '-users,-error_rate' : '-error_rate,-users',
+            filter: sort === 'rate' ? `attempts >= ${HARD_WORDS_MIN_ATTEMPTS}` : '',
+            skipTotal: true,
+        });
+    return list.items.map(item => ({
+        word: item.word,
+        users: item.users,
+        typists: item.typists,
+        attempts: item.attempts,
+        mistakes: item.mistakes,
+        errorRate: item.error_rate,
+    }));
 };

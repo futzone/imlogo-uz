@@ -183,4 +183,25 @@ test("tugallanmagan so'zlar rejimi logi `finished = false` beradi", () => {
     assert.equal(replay.engine.finished, false);
 });
 
+test("qiyin so'zlar: tuzatilgan xato ham hisoblanadi, tinish belgilari olib tashlanadi", () => {
+    const config: Config = { mode: 'words', amount: 3, punctuation: true, numbers: false, alphabet: 'lotin' };
+    const key = (t: number, v: string | null, k: string) => ({ t, v, it: v === null ? 'deleteContentBackward' : 'insertText', k });
+    const log = [
+        // "Kitob," — to'g'ri.
+        key(0, 'K', 'K'), key(100, 'Ki', 'i'), key(200, 'Kit', 't'), key(300, 'Kito', 'o'), key(400, 'Kitob', 'b'),
+        key(500, 'Kitob,', ','), key(600, 'Kitob, ', ' '),
+        // "til" — "x" bosilib, o'chirilib, tuzatilgan.
+        key(700, 't', 't'), key(800, 'tx', 'x'), key(900, 't', 'Backspace'), key(1000, 'ti', 'i'), key(1100, 'til', 'l'),
+        key(1200, 'til ', ' '),
+        // "va" — oxirida noto'g'ri qolgan ("vx"), mashq tugashi uchun bo'sh joy.
+        key(1300, 'v', 'v'), key(1400, 'vx', 'x'), key(1500, 'vx ', ' '),
+    ];
+    const replay = T.replayTypingLog(config, ['Kitob,', 'til', 'va'], log);
+    assert.deepEqual(T.typingWordAttempts(replay.engine), [
+        { word: 'kitob', mistaken: false },
+        { word: 'til', mistaken: true },
+        { word: 'va', mistaken: true },
+    ]);
+});
+
 console.log(`\n${passed} ta test o'tdi`);

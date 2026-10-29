@@ -9,11 +9,13 @@ import {
     avatarUrl,
     Board,
     fetchLeaderboard,
-    fetchMistakeWords,
+    fetchHardWords,
+    HARD_WORDS_MIN_ATTEMPTS,
+    HardWord,
+    HardWordsSort,
     fetchMyRank,
     LeaderboardPeriod,
     LeaderRow,
-    MistakeWord,
 } from '@/lib/app/account';
 import { useAuth } from '../auth/AuthProvider';
 import DashboardPage from '../DashboardPage';
@@ -112,13 +114,13 @@ const metrics: Record<Board, Metric[]> = {
     ],
 };
 
-/** Hamjamiyat yorliqlari: ikki reyting va xato so'zlar. */
+/** Hamjamiyat yorliqlari: ikki reyting va tez yozishdagi qiyin so'zlar. */
 type Tab = Board | 'mistakes';
 
 const tabs: { value: Tab; label: string }[] = [
     { value: 'typing', label: 'Tez yoziş' },
     { value: 'dictation', label: 'Diktant' },
-    { value: 'mistakes', label: 'Xato sözlar' },
+    { value: 'mistakes', label: 'Qiyin sözlar' },
 ];
 
 const periods: { value: LeaderboardPeriod; label: string }[] = [
@@ -161,7 +163,7 @@ const CommunityView: React.FC = () => {
             subtitle="Imlo Go foydalanuvçilari reytingi va haftalik musobaqa. Hisobingizga kiring — natijalaringiz reytingga avtomatik qöşiladi."
         >
             {tab === 'mistakes' ? (
-                <MistakeWords tabs={<Segmented className="mt-6 w-full md:w-auto md:self-start" options={tabs} value={tab} onChange={setTab} />} />
+                <HardWords tabs={<Segmented className="mt-6 w-full md:w-auto md:self-start" options={tabs} value={tab} onChange={setTab} />} />
             ) : (
                 <Leaderboards key={tab} board={tab} onTabChange={setTab} />
             )}
@@ -261,28 +263,45 @@ const Leaderboards: React.FC<{ board: Board; onTabChange: (tab: Tab) => void }> 
     );
 };
 
-/** Diktantlarda eng ko'p xato qilinadigan so'zlar. */
-const MistakeWords: React.FC<{ tabs: React.ReactNode }> = ({ tabs: tabSwitch }) => {
-    const [words, setWords] = useState<MistakeWord[] | null | 'error'>(null);
+const hardWordSorts: { value: HardWordsSort; label: string; hint: string }[] = [
+    { value: 'users', label: 'Eng köp odam', hint: 'Eng köp foydalanuvçi xato qilgan sözlar.' },
+    {
+        value: 'rate',
+        label: 'Eng qiyin',
+        hint: `Xato ulişi eng yuqori sözlar (kamida ${HARD_WORDS_MIN_ATTEMPTS} marta terilganlar).`,
+    },
+];
+
+/** Tez yozishda eng ko'p xato qilinadigan so'zlar. */
+const HardWords: React.FC<{ tabs: React.ReactNode }> = ({ tabs: tabSwitch }) => {
+    const [sort, setSort] = useState<HardWordsSort>('users');
+    const [result, setResult] = useState<{ sort: HardWordsSort; words: HardWord[] | 'error' } | null>(null);
+    const words = result?.sort === sort ? result.words : null;
 
     useEffect(() => {
         let cancelled = false;
-        fetchMistakeWords(50)
-            .then(list => !cancelled && setWords(list))
-            .catch(() => !cancelled && setWords('error'));
+        fetchHardWords(sort, 50)
+            .then(list => !cancelled && setResult({ sort, words: list }))
+            .catch(() => !cancelled && setResult({ sort, words: 'error' }));
         return () => {
             cancelled = true;
         };
-    }, []);
+    }, [sort]);
 
-    const top = Array.isArray(words) && words.length ? words[0].mistakes : 1;
+    const top = Array.isArray(words) && words.length ? (sort === 'users' ? words[0].users : words[0].errorRate) : 1;
 
     return (
         <>
             {tabSwitch}
+            <Segmented
+                className="mt-2 w-full md:w-auto md:self-start"
+                options={hardWordSorts}
+                value={sort}
+                onChange={setSort}
+            />
             <p className="mt-2 text-xs text-muted">
-                Barça foydalanuvçilar diktantlarida eng köp xato yozilgan sözlar. Yonida — eng köp uçraydigan notöğri
-                yozilişi.
+                Tez yoziş maşqlarida terilayotganda xato bosilgan sözlar (tuzatilgan bölsa ham).{' '}
+                {hardWordSorts.find(s => s.value === sort)?.hint}
             </p>
             {words === null ? (
                 <Spinner className="flex-1 py-16" />
@@ -293,34 +312,35 @@ const MistakeWords: React.FC<{ tabs: React.ReactNode }> = ({ tabs: tabSwitch }) 
                     text="Röyxatni yuklab bölmadi. Birozdan söng qayta urinib köring."
                 />
             ) : words.length === 0 ? (
-                <EmptyState icon={<LuSpellCheck aria-hidden />} text="Hali ma’lumot yetarli emas. Diktant yozing!">
-                    <AppButton href="/app">Diktant yoziş</AppButton>
+                <EmptyState icon={<LuSpellCheck aria-hidden />} text="Hali ma’lumot yetarli emas. Tez yoziş maşqini bajaring!">
+                    <AppButton href="/app/tez-yozish">Maşqni boşlaş</AppButton>
                 </EmptyState>
             ) : (
                 <ol className="mt-4 flex flex-col gap-2">
-                    {words.map((item, i) => (
-                        <li key={item.word} className={clsx(cardClass, 'relative overflow-hidden px-4 py-3')}>
-                            <span
-                                className="absolute inset-y-0 left-0 bg-danger/[0.06]"
-                                style={{ width: `${Math.max(4, (item.mistakes / top) * 100)}%` }}
-                                aria-hidden
-                            />
-                            <div className="relative flex items-center gap-3 sm:gap-4">
-                                <span className="flex w-8 shrink-0 justify-center">{rankBadge(i + 1)}</span>
-                                <div className="min-w-0 flex-1">
-                                    <p className="truncate font-heading text-lg font-semibold leading-tight">{item.word}</p>
-                                    <p className="mt-0.5 truncate font-mono text-[11px] text-muted">
-                                        köpinça: <span className="text-danger-deep line-through decoration-danger/60">{item.variant}</span>
-                                        {' · '}
-                                        {item.users} kişi
-                                    </p>
+                    {words.map((item, i) => {
+                        const value = sort === 'users' ? item.users : item.errorRate;
+                        return (
+                            <li key={item.word} className={clsx(cardClass, 'relative overflow-hidden px-4 py-3')}>
+                                <span
+                                    className="absolute inset-y-0 left-0 bg-danger/[0.06]"
+                                    style={{ width: `${Math.max(4, (value / (top || 1)) * 100)}%` }}
+                                    aria-hidden
+                                />
+                                <div className="relative flex items-center gap-3 sm:gap-4">
+                                    <span className="flex w-8 shrink-0 justify-center">{rankBadge(i + 1)}</span>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="truncate font-heading text-lg font-semibold leading-tight">{item.word}</p>
+                                        <p className="mt-0.5 truncate font-mono text-[11px] text-muted">
+                                            {item.users} / {item.typists} kişi xato qilgan · {item.mistakes} / {item.attempts} uriniş
+                                        </p>
+                                    </div>
+                                    <span className="shrink-0 text-right font-mono text-lg font-medium text-danger-deep">
+                                        {sort === 'users' ? `${item.users} kişi` : `${Math.round(item.errorRate)}%`}
+                                    </span>
                                 </div>
-                                <span className="shrink-0 text-right font-mono text-lg font-medium text-danger-deep">
-                                    {item.mistakes} ta
-                                </span>
-                            </div>
-                        </li>
-                    ))}
+                            </li>
+                        );
+                    })}
                 </ol>
             )}
         </>

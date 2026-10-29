@@ -36,6 +36,8 @@ export class TypingEngine {
     readonly words: string[] = [];
     readonly typed: string[] = [];
     readonly samples: TypingSample[] = [];
+    /** Har bir so'z (indeks bo'yicha) terilayotganda bosilgan xato klavishlar soni — tuzatilganlari ham. */
+    readonly wordErrors: number[] = [];
 
     current = '';
     started = false;
@@ -93,6 +95,7 @@ export class TypingEngine {
         } else {
             this.incorrectKeys++;
             this.secondErrors++;
+            this.wordErrors[this.index] = (this.wordErrors[this.index] ?? 0) + 1;
         }
     }
 

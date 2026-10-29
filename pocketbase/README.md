@@ -56,7 +56,8 @@ uchun API orqali ochiq.
 | `users.last_seen` | Oxirgi faollik — faqat server yozadi (kirish, sessiya yangilash, `POST /api/imlogo/ping`) |
 | `profiles` | view: ism, rasm, ro'yxatdan o'tgan va oxirgi faol vaqt. Faqat id bo'yicha ochiladi |
 | `typing_public`, `dictation_public` | view: profilda ko'rinadigan natijalar (tez yozishda faqat `ranked`) |
-| `mistake_words` | view: diktantlarda eng ko'p xato yozilgan so'zlar va eng ko'p uchraydigan xato varianti |
+| `typing_word_stats` | foydalanuvchi × so'z: necha marta terilgan, nechtasida xato bosilgan (tuzatilgan bo'lsa ham). Faqat server yozadi (`lib/word_stats.js`, reytingga kirgan mashqlardan) |
+| `typing_hard_words` | view: tez yozishdagi "qiyin so'zlar" — nechta odam xato qilgan, xato ulushi (`1793150000_typing_hard_words.js`; diktantdagi `mistake_words` o'rniga) |
 
 Reyting view'lariga `avatar` ustuni qo'shildi. Rasm manzili `users` kolleksiyasi orqali olinadi.
 

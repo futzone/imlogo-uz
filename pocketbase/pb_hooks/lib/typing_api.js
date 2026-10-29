@@ -251,6 +251,15 @@ const submit = e => {
     });
     $app.save(record);
 
+    // "Qiyin so'zlar" statistikasi — faqat reytingga kirgan natijalardan.
+    if (flags.length === 0) {
+        try {
+            require(`${__hooks}/lib/word_stats.js`).record($app, userId, T.typingWordAttempts(replay.engine));
+        } catch (err) {
+            $app.logger().warn('typing_word_stats yozilmadi', 'error', String(err));
+        }
+    }
+
     // Shubhali natijalarni keyin ko'rib chiqish uchun log mashq bilan saqlanadi.
     test.set('log', log);
     test.set('result', record.id);

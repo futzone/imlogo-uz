@@ -4,9 +4,10 @@ const __modules = {
 "lib/app/typing/replay.ts": function (exports) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.replayTypingLog = void 0;
+exports.typingWordAttempts = exports.replayTypingLog = void 0;
 const engine_1 = __require("lib/app/typing/engine.ts");
 const input_1 = __require("lib/app/typing/input.ts");
+const text_1 = __require("lib/app/typing/text.ts");
 /**
  * Bosishlar logini berilgan so'zlar ustida qaytadan o'ynaydi: natija
  * (WPM, aniqlik, barqarorlik, kesimlar) brauzerdagi bilan bir xil chiqadi.
@@ -32,6 +33,36 @@ const replayTypingLog = (config, words, log) => {
     return { engine, events };
 };
 exports.replayTypingLog = replayTypingLog;
+/** So'z statistikasi uchun: kichik harf, chetidagi tinish belgilari olib tashlanadi. */
+// Lotin (o‘, ş, ç va h.k.) va kirill harflari; serverdagi JS dvigateli uchun `\p{L}` ishlatilmaydi.
+const LETTER = /[a-zA-Z\u00C0-\u024F\u0400-\u04FF]/;
+const statsWord = (word) => {
+    const lower = word.toLowerCase();
+    let start = 0;
+    let end = lower.length;
+    while (start < end && !LETTER.test(lower[start]))
+        start++;
+    while (end > start && !LETTER.test(lower[end - 1]))
+        end--;
+    return lower.slice(start, end);
+};
+/**
+ * Yakunlangan (bo'sh joy bilan o'tilgan) so'zlar bo'yicha xatolar — "Qiyin
+ * so'zlar" reytingi uchun. Harfsiz bo'laklar (raqamlar, tinish belgilari) olinmaydi.
+ */
+const typingWordAttempts = (engine) => {
+    var _a;
+    const attempts = [];
+    for (let i = 0; i < engine.typed.length; i++) {
+        const word = statsWord(engine.words[i]);
+        if (word === '' || word.length > 40)
+            continue;
+        const mistaken = ((_a = engine.wordErrors[i]) !== null && _a !== void 0 ? _a : 0) > 0 || !(0, text_1.isTypedWordCorrect)(engine.typed[i], engine.words[i]);
+        attempts.push({ word, mistaken });
+    }
+    return attempts;
+};
+exports.typingWordAttempts = typingWordAttempts;
 
 },
 "lib/app/typing/engine.ts": function (exports) {
@@ -56,6 +87,8 @@ class TypingEngine {
         this.words = [];
         this.typed = [];
         this.samples = [];
+        /** Har bir so'z (indeks bo'yicha) terilayotganda bosilgan xato klavishlar soni — tuzatilganlari ham. */
+        this.wordErrors = [];
         this.current = '';
         this.started = false;
         this.finished = false;
@@ -91,6 +124,7 @@ class TypingEngine {
             this.words.push(this.nextWord());
     }
     keystroke(correct) {
+        var _a;
         this.started = true;
         this.secondKeys++;
         if (correct) {
@@ -99,6 +133,7 @@ class TypingEngine {
         else {
             this.incorrectKeys++;
             this.secondErrors++;
+            this.wordErrors[this.index] = ((_a = this.wordErrors[this.index]) !== null && _a !== void 0 ? _a : 0) + 1;
         }
     }
     /**

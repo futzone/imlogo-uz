@@ -2,6 +2,7 @@ import { TypingConfig } from './config';
 import { TypingEngine } from './engine';
 import { TypingInputEvent, TypingLogEntry } from './guard';
 import { applyTypingValue, TypingInputState } from './input';
+import { isTypedWordCorrect } from './text';
 
 export interface TypingReplay {
     engine: TypingEngine;
@@ -31,4 +32,37 @@ export const replayTypingLog = (config: TypingConfig, words: readonly string[], 
 
     if (config.mode === 'time' && engine.started) engine.tick(config.amount * 1000);
     return { engine, events };
+};
+
+/** So'z statistikasi uchun: kichik harf, chetidagi tinish belgilari olib tashlanadi. */
+// Lotin (o‘, ş, ç va h.k.) va kirill harflari; serverdagi JS dvigateli uchun `\p{L}` ishlatilmaydi.
+const LETTER = /[a-zA-Z\u00C0-\u024F\u0400-\u04FF]/;
+const statsWord = (word: string): string => {
+    const lower = word.toLowerCase();
+    let start = 0;
+    let end = lower.length;
+    while (start < end && !LETTER.test(lower[start])) start++;
+    while (end > start && !LETTER.test(lower[end - 1])) end--;
+    return lower.slice(start, end);
+};
+
+export interface TypingWordAttempt {
+    word: string;
+    /** So'z terilayotganda kamida bitta xato klavish bosilgan (tuzatilgan bo'lsa ham) yoki oxirida noto'g'ri qolgan. */
+    mistaken: boolean;
+}
+
+/**
+ * Yakunlangan (bo'sh joy bilan o'tilgan) so'zlar bo'yicha xatolar — "Qiyin
+ * so'zlar" reytingi uchun. Harfsiz bo'laklar (raqamlar, tinish belgilari) olinmaydi.
+ */
+export const typingWordAttempts = (engine: TypingEngine): TypingWordAttempt[] => {
+    const attempts: TypingWordAttempt[] = [];
+    for (let i = 0; i < engine.typed.length; i++) {
+        const word = statsWord(engine.words[i]);
+        if (word === '' || word.length > 40) continue;
+        const mistaken = (engine.wordErrors[i] ?? 0) > 0 || !isTypedWordCorrect(engine.typed[i], engine.words[i]);
+        attempts.push({ word, mistaken });
+    }
+    return attempts;
 };
