@@ -7,7 +7,8 @@ import { LuArrowRight, LuLanguages } from 'react-icons/lu';
 
 import AppStoreButton from './AppStoreButton';
 import PlayStoreButton from './PlayStoreButton';
-import WindowsButton from './WindowsButton';
+import WindowsButton from './WindowsButton'
+import MacButton from './MacButton';
 import Badge from './ui/Badge';
 import CelebrationBadge from './celebration/CelebrationBadge';
 import CelebrationBanner from './celebration/CelebrationBanner';
@@ -77,12 +78,13 @@ const Hero: React.FC = () => {
                 </motion.div>
 
                 <motion.div
-                    className="mx-auto mt-6 flex w-full max-w-xs flex-col items-center gap-3 sm:max-w-none sm:flex-row sm:justify-center sm:gap-4"
+                    className="mx-auto mt-6 flex w-full max-w-xs flex-col items-center gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:justify-center sm:gap-4"
                     {...fadeUp(0.4)}
                 >
                     <AppStoreButton dark />
                     <PlayStoreButton dark />
                     <WindowsButton dark />
+                    <MacButton dark />
                 </motion.div>
 
                 {/* Ilova skrinshoti: orbital halqalar va suzuvchi kartalar bilan */}

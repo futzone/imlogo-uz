@@ -60,6 +60,14 @@ uchun API orqali ochiq.
 
 Reyting view'lariga `avatar` ustuni qo'shildi. Rasm manzili `users` kolleksiyasi orqali olinadi.
 
+### Kompyuter ilovalari relizlari
+
+`1793140000_app_releases.js` + `pb_hooks/releases.pb.js`: `app_releases` (windows, macos) —
+sayt yuklab olish havolasini shu yerdan oladi. Fayllar GitHub Releases'da; yozuvni
+CI `POST /api/imlogo/releases` (`X-Release-Token` sarlavhasi) orqali yangilaydi.
+Token serverdagi `/opt/pocketbase/.env` da `IMLOGO_RELEASE_TOKEN`, GitHub'da
+`futzone/imlogo` → Settings → Secrets → `IMLOGO_RELEASE_TOKEN`.
+
 ## 2. Google orqali kirish
 
 1. [Google Cloud Console](https://console.cloud.google.com/apis/credentials) → **Create credentials → OAuth client ID** → *Web application*.

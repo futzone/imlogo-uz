@@ -3,6 +3,7 @@ import { ctaDetails } from "@/data/cta"
 import AppStoreButton from "./AppStoreButton"
 import PlayStoreButton from "./PlayStoreButton"
 import WindowsButton from "./WindowsButton"
+import MacButton from "./MacButton"
 import Reveal from "./ui/Reveal"
 
 const CTA: React.FC = () => {
@@ -23,10 +24,11 @@ const CTA: React.FC = () => {
 
                         <p className="mx-auto mt-4 max-w-xl text-white/70">{ctaDetails.subheading}</p>
 
-                        <div className="mt-8 flex w-full max-w-xs flex-col items-center gap-3 sm:max-w-none sm:flex-row sm:justify-center sm:gap-4">
+                        <div className="mt-8 flex w-full max-w-xs flex-col items-center gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:justify-center sm:gap-4">
                             <AppStoreButton />
                             <PlayStoreButton />
                             <WindowsButton />
+                            <MacButton />
                         </div>
                     </div>
                 </div>

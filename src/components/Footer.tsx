@@ -6,7 +6,8 @@ import { LuBug } from 'react-icons/lu';
 import Logo from './Logo';
 import AppStoreButton from './AppStoreButton';
 import PlayStoreButton from './PlayStoreButton';
-import WindowsButton from './WindowsButton';
+import WindowsButton from './WindowsButton'
+import MacButton from './MacButton';
 import { siteDetails } from '@/data/siteDetails';
 import { footerDetails } from '@/data/footer';
 
@@ -61,10 +62,11 @@ const Footer: React.FC = () => {
             <div className="mx-auto max-w-7xl px-5 pb-10">
                 <div className="flex flex-col items-start gap-4 rounded-2xl border border-line bg-white p-5 sm:flex-row sm:items-center sm:justify-between">
                     <p className="font-heading text-base font-semibold">Imlo Go istalgan qurilmada</p>
-                    <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+                    <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
                         <AppStoreButton dark />
                         <PlayStoreButton dark />
                         <WindowsButton dark />
+                        <MacButton dark />
                     </div>
                 </div>
             </div>

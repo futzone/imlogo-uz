@@ -61,7 +61,8 @@ export const AppButton: React.FC<React.PropsWithChildren<AppButtonProps>> = ({
             </a>
         );
     }
-    if (href.startsWith('mailto:')) {
+    // Yuklab olish yo'nalishlari sahifa emas — oddiy havola.
+    if (href.startsWith('mailto:') || href.startsWith('/yuklab-olish/')) {
         return (
             <a href={href} onClick={onClick} className={classes}>
                 {content}
